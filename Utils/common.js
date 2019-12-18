@@ -1,24 +1,5 @@
-
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
 var generatePassword = require("password-generator");
-
-//email Config
-var smtpConfig = {
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: 2525,
-    secure: false,
-    auth: {
-        user: process.env.SystemEmail,
-        pass: process.env.SystemEmailPassword
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-};
-
-var transporter = nodemailer.createTransport(smtpTransport(smtpConfig));
+var bcrypt = require('bcryptjs');
 
 var maxLength = 10;
 var minLength = 8;
@@ -55,7 +36,17 @@ function customPassword() {
     }
     return password;
 }
+
+function encryption(password) {
+    return bcrypt.hashSync(password, 8)
+}
+
+function encryptioncompareSync(password, userpassword) {
+    return bcrypt.compareSync(password, userpassword)
+}
+
 module.exports = {
-    transporter: transporter,
     customPassword: customPassword,
+    encryption: encryption,
+    encryptioncompareSync: encryptioncompareSync
 }
