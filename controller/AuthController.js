@@ -89,7 +89,6 @@ router.post('/confirm', async (req, res) => {
     } else {
         await tokenhandler.verify(req.body.token)
             .then(function (decoded) {
-                console.log(decoded)
                 userTransaction.confirm(req, res, decoded);
             }).catch((error) => req.send('error: ', error));
     }
