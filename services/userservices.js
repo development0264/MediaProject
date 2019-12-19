@@ -112,6 +112,7 @@ function userTransaction() {
                 if (chkUserExist != null) {
                     res.status(200).send({ auth: false, message: "email is already exist..." })
                 } else {
+                    console.log(req.body.password)
                     let hashedPassword = commonfunction.encryption(req.body.password)
                     var objUserReg = req.body
                     objUserReg.password = hashedPassword
@@ -300,6 +301,17 @@ function userTransaction() {
             });
         });
     }
+
+    // this.checkuser = async function (decoded, callback) {
+    //     User.findOne({ where: { email: decoded.email, isaccountverify: true } }).then(function (UserExist) {
+    //         if (UserExist != null) {
+    //             return callback(UserExist)
+    //         }
+    //         else {
+    //             return callback(null)
+    //         }
+    //     })
+    // }
 
 }
 
