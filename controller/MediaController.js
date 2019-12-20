@@ -1,47 +1,37 @@
 var express = require('express');
 var router = express.Router();
-const isAuthorized = require('./requestAuthenticator')
 var imagevideohandler = require('../Utils/imagevideohandler');
+const isAuthorized = require('../controller/requestAuthenticator')
 
 
-router.post('/upload/photo', isAuthorized, async (req, res) => {
+router.post('/photo', isAuthorized, async (req, res) => {
     var response = await imagevideohandler.imageupload(req, res)
     if (response.success) {
         res.status(200).send(response).end();
     }
     else {
-        res.status(500).send(response).end();
+        res.status(200).send(response).end();
     }
 });
 
-router.post('/upload/video', isAuthorized, async (req, res) => {
+router.post('/video', isAuthorized, async (req, res) => {
     var response = await imagevideohandler.videoupload(req, res)
     if (response.success) {
         res.status(200).send(response).end();
     }
     else {
-        res.status(500).send(response).end();
+        res.status(200).send(response).end();
     }
 });
 
-router.post('/upload/photoandvideo', isAuthorized, async (req, res) => {
-    console.log(req.body)
+router.post('/photoandvideo', isAuthorized, async (req, res) => {
     var response = await imagevideohandler.imagevideoupload(req, res)
     if (response.success) {
         res.status(200).send(response).end();
     }
     else {
-        res.status(500).send(response).end();
+        res.status(200).send(response).end();
     }
-
-
-    // var response = await imagevideohandler.videoupload(req, res)
-    // if (response.success) {
-    //     res.status(200).send(response).end();
-    // }
-    // else {
-    //     res.status(500).send(response).end();
-    // }
 });
 
 module.exports = router

@@ -2,6 +2,7 @@
 var Mediaservices = require('../services/mediaservices');
 var Commonfunction = require('./common.js');
 var formidable = require('formidable');
+var fs = require('fs');
 
 
 function imagevideohandler() {
@@ -9,7 +10,11 @@ function imagevideohandler() {
     this.imageupload = async function (req, res) {
         return new Promise(function (resolve, reject) {
             var form = new formidable.IncomingForm();
-            form.uploadDir = __dirname + '/../MediaUploads/Images';
+            var dir = "./" + process.env.MediaFolderName;
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+            }
+            form.uploadDir = __dirname + "/../" + process.env.MediaFolderName;
             var Image = {};
 
             form.parse(req, function (err, fields, files) {
@@ -47,7 +52,13 @@ function imagevideohandler() {
     this.videoupload = async function (req, res) {
         return new Promise(function (resolve, reject) {
             var form = new formidable.IncomingForm();
-            form.uploadDir = __dirname + '/../MediaUploads/Video';
+
+            var dir = "./" + process.env.MediaFolderName;
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+            }
+            form.uploadDir = __dirname + "/../" + process.env.MediaFolderName;
+
             var Video = {};
             form.parse(req, function (err, fields, files) {
             });
@@ -87,7 +98,12 @@ function imagevideohandler() {
             });
             form.on('fileBegin', function (name, file) {
                 if (name == "Image") {
-                    form.uploadDir = __dirname + '/../MediaUploads/Images';
+                    var dir = "./" + process.env.MediaFolderName;
+                    if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir);
+                    }
+                    form.uploadDir = __dirname + "/../" + process.env.MediaFolderName;
+
                     var ext = file.name.substring(file.name.indexOf('.'), file.name.length);
                     var NewName = Commonfunction.GetUserNameFromDate();
                     if (ext.indexOf('?') > -1) {
@@ -95,9 +111,15 @@ function imagevideohandler() {
                     };
                     file.path = form.uploadDir + "/" + NewName + ext;
                     FileName.push({ "Type": "Image", "Name": NewName + ext });
+                    //console.log(fs.createReadStream(file.path))
                 }
                 if (name == "Video") {
-                    form.uploadDir = __dirname + '/../MediaUploads/Video';
+                    var dir = "./" + process.env.MediaFolderName;
+                    if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir);
+                    }
+                    form.uploadDir = __dirname + "/../" + process.env.MediaFolderName;
+
                     var ext = file.name.substring(file.name.indexOf('.'), file.name.length);
                     var NewName = Commonfunction.GetUserNameFromDate();
                     if (ext.indexOf('?') > -1) {
@@ -105,15 +127,16 @@ function imagevideohandler() {
                     };
                     file.path = form.uploadDir + "/" + NewName + ext;
                     FileName.push({ "Type": "Video", "Name": NewName + ext });
+                    //console.log(fs.createReadStream(dir + "/" + NewName + ext))
 
                 }
+                //fs.createReadStream(file.path)
 
             });
             form.on('end', function () {
                 function uploader(i) {
                     if (i < FileName.length) {
                         if (FileName[i].Type == "Image") {
-                            console.log(req.decoded)
                             Mediaservices.saveImage(req.decoded, FileName[i].Name).then(function (upload) {
                                 uploader(i + 1);
                             })

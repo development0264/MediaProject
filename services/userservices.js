@@ -4,7 +4,8 @@ var emailhandler = require('../Utils/emailhandler');
 var commonfunction = require('../Utils/common');
 var tokenhandler = require('../Utils/tokenhandler');
 var sequelize = models.sequelize;
-var User = models.user;
+var User = models.tbluser;
+var bcrypt = require('bcryptjs');
 
 const redis = require('redis');
 const { RateLimiterRedis } = require('rate-limiter-flexible');
@@ -23,7 +24,9 @@ const limiterFastBruteByIP = new RateLimiterRedis({
 });
 
 async function loginRoute(req, res) {
+    console.log(req.body)
 
+    //return new Promise(function (resolve, reject) {
     const ipAddr = req.connection.remoteAddress;
     const [resFastByIP, resSlowByIP] = await Promise.all([
         limiterFastBruteByIP.get(ipAddr),
@@ -35,12 +38,15 @@ async function loginRoute(req, res) {
         retrySecs = Math.round(resFastByIP.msBeforeNext / 1000) || 1;
     }
 
+    console.log("retrySecs")
     if (retrySecs > 0) {
         res.set('Retry-After', String(retrySecs));
         res.status(429).send({ success: false, message: "multiple attempts to login Retry-After : " + parseInt(retrySecs / 60) + " minutes" });
     } else {
         //sequelize.transaction(function (t) {
-        var Encryptpassword = commonfunction.encryption(req.body.password);
+        console.log(req.body.password)
+        var Encryptpassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password);
+        console.log(Encryptpassword)
         User.findOne({
             where: {
                 $or: [{
@@ -67,7 +73,7 @@ async function loginRoute(req, res) {
                 }
             }
             else {
-                var passwordIsValid = commonfunction.encryptioncompareSync(req.body.password, response.password)
+                var passwordIsValid = bcrypt.compareSync(req.body.password, response.password)//commonfunction.encryptioncompareSync(req.body.password, response.password)               
                 if (passwordIsValid) {
                     var user = {
                         id: response.id,
@@ -76,7 +82,7 @@ async function loginRoute(req, res) {
                         password: Encryptpassword,
                     }
                     var token = tokenhandler.sign(user)
-                    res.status(400).send({
+                    res.status(200).send({
                         success: true,
                         token: token,
                         data: response,
@@ -98,26 +104,35 @@ async function loginRoute(req, res) {
             }
         });
     }
+    // }).then(function (response) {
+    //     return response;
+    // }).catch(function (err) {
+    //     return {
+    //         success: false,
+    //         message: err.message,
+    //     };
+    // });
 }
 
 function userTransaction() {
 
-    this.signup = function (req, res) {
-        sequelize.transaction(function (t) {
+    this.signup = async function (req, res) {
+        //sequelize.transaction(function (t) {
+        return new Promise(function (resolve, reject) {
             return User.findOne({
                 where: {
                     email: req.body.email
                 }
             }).then(function (chkUserExist) {
                 if (chkUserExist != null) {
-                    res.status(200).send({ auth: false, message: "email is already exist..." })
+                    resolve({ auth: false, message: "email is already exist..." })
                 } else {
-                    console.log(req.body.password)
-                    let hashedPassword = commonfunction.encryption(req.body.password)
+                    var hashedPassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password)
+                    console.log("hashedPassword", hashedPassword)
                     var objUserReg = req.body
                     objUserReg.password = hashedPassword
                     objUserReg.createddate = new Date()
-                    return User.create(objUserReg).then(function (UserReg) {
+                    User.create(objUserReg).then(function (UserReg) {
                         if (UserReg != null) {
                             var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: hashedPassword })
 
@@ -131,46 +146,56 @@ function userTransaction() {
                                 body: body,
                             }
                             return emailhandler.sendemail(obj).then(function () {
-                                return {
-                                    auth: true,
+                                resolve({
+                                    success: true,
                                     message: 'Your account have been successfully created. In order to activate it, please check your mailbox for more details.',
                                     token: token
-                                };
+                                });
                             })
                         } else {
-                            res.status(500).send({ auth: false, message: "Registration failed" })
+                            resolve({ success: false, message: "Registration failed" })
                         }
-
                     })
                 }
             })
         }).then(function (response) {
-            res.json(response);
+            return response;
         }).catch(function (err) {
-            res.json({
+            return {
                 success: false,
                 message: err.message,
-            });
+            };
         });
     }
 
-    this.verify = function (req, res, decoded) {
-        return User.findOne({ where: { email: decoded.email, isaccountverify: false } }).then(function (checkUserExist) {
-            if (checkUserExist != null) {
-                User.update({ isaccountverify: true, modifieddate: new Date() }, {
-                    where: {
-                        id: checkUserExist.id
-                    }
-                }).then(function (response) {
-                    res.writeHead(301,
-                        { Location: "http://localhost:3000" }
-                    );
-                    res.end()
-                })
-            } else {
-                res.send({ auth: false, message: "Invalid token : " + req.query.token });
-            }
-        })
+    this.verify = async function (req, res, decoded) {
+        decoded = JSON.parse(decoded)
+        //sequelize.transaction(function (t) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({
+                where:
+                {
+                    email: decoded.email,
+                    isaccountverify: false
+                }
+            }).then(function (checkUserExist) {
+                if (checkUserExist != null) {
+                    checkUserExist.updateAttributes({ isaccountverify: true, modifieddate: new Date() })
+                        .then(function (response) {
+                            resolve({ success: true, Location: "http://localhost:3000" })
+                        })
+                } else {
+                    resolve({ success: false, message: "Invalid token " });
+                }
+            })
+        }).then(function (response) {
+            return response;
+        }).catch(function (err) {
+            return {
+                success: false,
+                message: err.message,
+            };
+        });
     }
 
     this.login = async function (req, res) {
@@ -178,7 +203,7 @@ function userTransaction() {
     }
 
     this.forgotpassword = async function (req, res) {
-        sequelize.transaction(function (t) {
+        return new Promise(function (resolve, reject) {
             return User.findOne({
                 where: {
                     $or: [{
@@ -189,10 +214,10 @@ function userTransaction() {
                 }
             }).then(function (response) {
                 if (response == null) {
-                    return {
+                    resolve({
                         success: false,
                         message: 'Please check email for reset password instructions',
-                    };
+                    });
                 } else {
 
                     var token = tokenhandler.sign({ email: req.query.email })
@@ -207,65 +232,66 @@ function userTransaction() {
                     }
 
                     return emailhandler.sendemail(obj).then(function () {
-                        return {
-                            auth: true,
+                        resolve({
+                            success: true,
                             message: 'email is sent on your register mail address.',
                             token: token
-                        };
+                        });
                     })
                 }
             });
         }).then(function (response) {
-            res.json(response);
+            return (response);
         }).catch(function (err) {
             // The catch here for other errors
             // console.error('[' + moment().format('DD/MM/YYYY hh:mm:ss a') + '] ' + err.stack || err.message);
-            res.json({
+            return {
                 success: false,
                 message: err.message,
-            });
+            };
         });
     }
 
     this.resetverification = async function (req, res) {
-        sequelize.transaction(function (t) {
-            return User.findOne({ where: { email: req.decoded.email, isaccountverify: true } }).then(function (checkUserExist) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({ where: { email: req.query.email, isaccountverify: true } }).then(function (checkUserExist) {
                 if (checkUserExist != null) {
                     checkUserExist.updateAttributes({ isaccountverify: false, modifieddate: new Date() }).then(function (response) {
-                        res.writeHead(301,
-                            { Location: "http://localhost:3000" }
-                        );
-                        res.end()
+                        // res.writeHead(301,
+                        //     { Location: "http://localhost:3000" }
+                        // );
+                        // res.end()
+                        resolve({ success: true, Location: "http://localhost:3000" })
                     })
                 } else {
-                    res.send({ auth: false, message: "Invalid token : " + req.query.token });
+                    resolve({ success: false, message: "Invalid token " });
                 }
             })
         }).then(function (response) {
-            res.json(response);
+            return (response);
         }).catch(function (err) {
-            res.json({
+            return {
                 success: false,
                 message: err.message,
-            });
+            };
         });
 
     }
 
-    this.request = async function (req, res, decoded) {
-        sequelize.transaction(function (t) {
-            return User.findOne({ where: { email: decoded.email, isaccountverify: true } }).then(function (checkUserExist) {
+    this.request = async function (req, res) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({ where: { email: req.body.email, isaccountverify: true } }).then(function (checkUserExist) {
                 if (checkUserExist != null) {
-                    return true
+                    resolve(true)
                 } else {
-                    return false
+                    resolve(false)
                 }
             })
         }).then(function (response) {
             if (response) {
-                res.send({ auth: true, message: "valid token : " + req.body.token });
+                return { success: true, Location: "http://localhost:3000" };
             } else {
-                res.send({ auth: false, message: "Invalid token : " + req.body.token });
+                return { success: false, message: "Invalid token : " + req.body.token };
             }
         }).catch(function (err) {
             res.json({
@@ -276,29 +302,28 @@ function userTransaction() {
     }
 
     this.confirm = async function (req, res, decoded) {
-        sequelize.transaction(function (t) {
-            return User.findOne({ where: { email: decoded.email, isaccountverify: true } }).then(function (checkUserExist) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({ where: { email: req.query.email, isaccountverify: true } }).then(function (checkUserExist) {
                 if (checkUserExist != null) {
-                    let hashedPassword = commonfunction.encryption(req.body.password)
+                    let hashedPassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password)
                     return checkUserExist.updateAttributes({ password: hashedPassword, modifieddate: new Date() }).then(function (Updateresponse) {
-                        return true
+                        resolve(true)
                     })
                 } else {
-                    return false
+                    resolve(false)
                 }
             })
         }).then(function (response) {
             if (response) {
-                res.send({ auth: true, message: "Your password is successfully reset." });
-                res.end()
+                return { success: true, message: "Your password is successfully reset." };
             } else {
-                res.send({ auth: false, message: "Invalid token : " + req.body.token });
+                return { success: false, message: "Invalid token " };
             }
         }).catch(function (err) {
-            res.json({
+            return {
                 success: false,
                 message: err.message,
-            });
+            };
         });
     }
 
