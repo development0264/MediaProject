@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router()
 const apiAdapter = require('./apiAdapter')
-const isAuthorized = require('../controller/requestAuthenticator')
+const isAuthorized = require('../Utils/tokenhandler').isAuthorized;
 var config = require('../config.js')
 
 const BASE_URL = process.env.BASE_URL
@@ -16,7 +16,7 @@ router.post('/upload/photo', multer.single('Image'), isAuthorized, (req, res) =>
     const fileRecievedFromClient = req.file; //File Object sent in 'fileFieldName' field in multipart/form-data
 
     let form = new FormData();
-    form.append('fileFieldName', fileRecievedFromClient.buffer, fileRecievedFromClient.originalname);
+    form.append('Image', fileRecievedFromClient.buffer, fileRecievedFromClient.originalname);
 
     api.post(req.path, form, {
         headers: {
@@ -39,7 +39,7 @@ router.post('/upload/video', multer.single('Video'), isAuthorized, (req, res) =>
 
     const fileRecievedFromClient = req.file;
     let form = new FormData();
-    form.append('fileFieldName', fileRecievedFromClient.buffer, fileRecievedFromClient.originalname);
+    form.append('Video', fileRecievedFromClient.buffer, fileRecievedFromClient.originalname);
 
     api.post(req.path, form, {
         headers: {
@@ -77,6 +77,27 @@ router.post('/upload/photoandvideo', cpUpload, isAuthorized, async (req, res) =>
         'maxContentLength': Infinity,
         'maxBodyLength': Infinity
     }).then((responseFromServer2) => {
+        res.send(responseFromServer2.data)
+    }).catch((err) => {
+        res.send(err)
+    })
+})
+
+router.post('/upload/share', isAuthorized, async (req, res) => {
+    api.post(req.path, req.body, {
+        params: {
+            iduser: req.decoded.id,
+            email: req.decoded.email,
+            idmedia: req.query.photoids
+        }
+    }).then((responseFromServer2) => {
+        if (responseFromServer2.data.success) {
+            var obj = {
+                email: req.decoded.email,
+                message: req.decoded.email + ' shared photo with you'
+            }
+            io.sockets.emit(req.body.email + '-notifications', obj);
+        }
         res.send(responseFromServer2.data)
     }).catch((err) => {
         res.send(err)

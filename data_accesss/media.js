@@ -1,18 +1,18 @@
 var models = require('../models');
 var sequelize = models.sequelize;
-var UserImages = models.tbluserimages;
-var UserVideo = models.tbluservideo;
+var UserMedia = models.tblusermedia;
 
 
 function userImage() {
 
     this.saveImage = async function (decode, Filename) {
         return sequelize.transaction(function (t) {
-            return UserImages.create({
+            return UserMedia.create({
                 iduser: decode.id,
-                imagename: Filename,
+                filename: Filename,
                 createdby: decode.name,
                 createddate: new Date(),
+                Type: 'Image'
             }).then(function (create) {
                 if (create) {
                     return { success: true, message: "Image Uploaded Successfully...", data: create }
@@ -32,11 +32,12 @@ function userImage() {
 
     this.savevideo = async function (decode, Filename) {
         return sequelize.transaction(function (t) {
-            return UserVideo.create({
+            return UserMedia.create({
                 iduser: decode.id,
                 filename: Filename,
                 createdby: decode.name,
                 createddate: new Date(),
+                Type: 'Video'
             }).then(function (create) {
                 if (create) {
                     return { success: true, message: "Video Uploaded Successfully...", data: create }

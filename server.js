@@ -13,13 +13,23 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 }));
 
 app.get('/', (req, res) => {
-    res.send("Welcome to Nodejs Api")
+    res.sendFile(__dirname + '/index.html');
 })
 
 app.use(express.static(__dirname + '/'));
 app.use('/api', router)
 
-var http = require('http');
-http.createServer(app).listen(3000);
+// for Socket
+var http = require('http').createServer(app);
+global.io = require('socket.io')(http);
+
+
+http.listen(process.env.APIPort, function () {
+    console.log('listening on *:' + process.env.APIPort);
+});
+
+io.sockets.on('connection', function (socket) {
+    console.log('connection...');
+})
 
 // app.listen(3000);

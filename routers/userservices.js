@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router()
 const apiAdapter = require('./apiAdapter')
-const isAuthorized = require('../controller/requestAuthenticator')
+const isAuthorized = require('../Utils/tokenhandler').isAuthorized;
 var tokenhandler = require('../Utils/tokenhandler');
 var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
 var validator = require('validator');
@@ -48,20 +48,17 @@ router.post('/auth/signup', async (req, res) => {
 })
 
 router.get('/auth/verify', async (req, res) => {
-    tokenhandler.verify(req.query.token)
-        .then(function (decoded) {
-            console.log("decoded", decoded)
-            api.get(req.path, {
-                params: {
-                    decoded: decoded
-                }
-            }).then((responseFromServer2) => {
-                res.send(responseFromServer2.data)
-            }).catch((err) => {
-                console.log(err)
-                res.send(err)
-            })
-        }).catch((error) => console.log('error: ', error));
+    tokenhandler.verify(req.query.token).then(function (response) {
+        api.get(req.path, {
+            params: {
+                decoded: response
+            }
+        }).then((responseFromServer2) => {
+            res.send(responseFromServer2.data)
+        }).catch((err) => {
+            res.send(err)
+        })
+    }).catch((error) => res.send(error));
 })
 
 router.post('/auth/login', async (req, res) => {
@@ -129,9 +126,7 @@ router.post('/auth/confirm', isAuthorized, async (req, res) => {
         res.status(404).send({ auth: false, message: "confirmpassword did not match password" })
     } else {
         // await tokenhandler.verify(req.body.token)
-        //     .then(function (decoded) {
-        console.log(req.decoded.email)
-        console.log(req.body)
+        //     .then(function (decoded) {      
         api.post(req.path, req.body, {
             params: {
                 email: req.decoded.email

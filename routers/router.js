@@ -8,7 +8,7 @@ router.use((req, res, next) => {
     next()
 })
 
-router.use(authRouter)
+router.use(mediaRouter)
 router.use(userServices)
 
 module.exports = router

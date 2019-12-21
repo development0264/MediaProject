@@ -5,7 +5,11 @@ var commonfunction = require('../Utils/common');
 var tokenhandler = require('../Utils/tokenhandler');
 var sequelize = models.sequelize;
 var User = models.tbluser;
+var Share = models.tblshare;
+var Invite = models.tblinviteduser;
 var bcrypt = require('bcryptjs');
+
+var config = require('../config');
 
 const redis = require('redis');
 const { RateLimiterRedis } = require('rate-limiter-flexible');
@@ -34,19 +38,18 @@ async function loginRoute(req, res) {
 
     let retrySecs = 0;
 
+    console.log(resFastByIP)
     if (resFastByIP !== null && resFastByIP.consumedPoints > maxWrongAttemptsByIPperMinute) {
         retrySecs = Math.round(resFastByIP.msBeforeNext / 1000) || 1;
     }
 
-    console.log("retrySecs")
+    console.log(retrySecs)
     if (retrySecs > 0) {
         res.set('Retry-After', String(retrySecs));
-        res.status(429).send({ success: false, message: "multiple attempts to login Retry-After : " + parseInt(retrySecs / 60) + " minutes" });
+        res.status(200).send({ success: false, message: "multiple attempts to login Retry-After : " + parseInt(retrySecs / 60) + " minutes" });
     } else {
-        //sequelize.transaction(function (t) {
-        console.log(req.body.password)
-        var Encryptpassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password);
-        console.log(Encryptpassword)
+        //sequelize.transaction(function (t) {       
+        var Encryptpassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password);      
         User.findOne({
             where: {
                 $or: [{
@@ -62,18 +65,18 @@ async function loginRoute(req, res) {
                     Promise.all([
                         limiterFastBruteByIP.consume(ipAddr)
                     ]);
-                    res.status(400).send({ success: false, message: 'email or name is wrong' });
+                    res.status(200).send({ success: false, message: 'email or name is wrong' });
                 } catch (rlRejected) {
                     if (rlRejected instanceof Error) {
                         throw rlRejected;
                     } else {
                         res.set('Retry-After', parseInt(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
-                        res.status(429).send({ success: false, message: "multiple attempts to login Retry-After : " + String(Math.round(rlRejected.msBeforeNext / 1000)) || 1 + " minutes" });
+                        res.status(200).send({ success: false, message: "multiple attempts to login Retry-After : " + String(Math.round(rlRejected.msBeforeNext / 1000)) || 1 + " minutes" });
                     }
                 }
             }
             else {
-                var passwordIsValid = bcrypt.compareSync(req.body.password, response.password)//commonfunction.encryptioncompareSync(req.body.password, response.password)               
+                var passwordIsValid = bcrypt.compareSync(req.body.password, response.password)//commonfunction.encryptioncompareSync(req.body.password, response.password)                             
                 if (passwordIsValid) {
                     var user = {
                         id: response.id,
@@ -81,23 +84,30 @@ async function loginRoute(req, res) {
                         email: response.email,
                         password: Encryptpassword,
                     }
-                    var token = tokenhandler.sign(user)
-                    res.status(200).send({
-                        success: true,
-                        token: token,
-                        data: response,
-                        message: "Login Successfully..."
-                    });
+                    var token = tokenhandler.sign(user, config.AuthorizationexpiresIn)
+
+                    CheckInviteUser(req.body.email, response.id).then(function () {
+
+                        res.status(200).send({
+                            success: true,
+                            token: token,
+                            data: response,
+                            message: "Login Successfully..."
+                        })
+                    })
+
                 } else {
                     try {
-                        limiterFastBruteByIP.consume(ipAddr),
-                            res.status(400).send({ success: false, message: 'password is wrong' });
+                        Promise.all([
+                            limiterFastBruteByIP.consume(ipAddr)
+                        ]);
+                        res.status(200).send({ success: false, message: 'password is wrong' });
                     } catch (rlRejected) {
                         if (rlRejected instanceof Error) {
                             throw rlRejected;
                         } else {
                             res.set('Retry-After', parseInt(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
-                            res.status(429).send({ success: false, message: "multiple attempts to login Retry-After : " + String(Math.round(rlRejected.msBeforeNext / 1000)) || 1 + " minutes" });
+                            res.status(200).send({ success: false, message: "multiple attempts to login Retry-After : " + String(Math.round(rlRejected.msBeforeNext / 1000)) || 1 + " minutes" });
                         }
                     }
                 }
@@ -114,6 +124,58 @@ async function loginRoute(req, res) {
     // });
 }
 
+
+function CheckInviteUser(email, UserId) {
+    return new Promise(function (resolve, reject) {
+        Invite.findAll({
+            where: {
+                email: email,
+                isaccept: 0
+            }
+        }).then(function (result) {
+            if (result.length) {
+                function UpdateOneByOne(k) {
+                    return new Promise(function (resolve1, reject1) {
+                        if (k < result.length) {
+                            return result[k].updateAttributes({
+                                isaccept: true,
+                            }).then(function () {
+                                return Share.findOne({
+                                    where: {
+                                        idinvited: result[k].id
+                                    }
+                                }).then(function (resShare) {
+                                    return resShare.updateAttributes({
+                                        idtouser: UserId
+                                    }).then(function (updatedCount) {
+                                        UpdateOneByOne(k + 1).then(function () {
+                                            resolve1(true);
+                                        });
+                                    })
+                                })
+                            })
+                        } else {
+                            resolve1(true);
+                        }
+                    })
+                }
+                return UpdateOneByOne(0).then(function (resreturnMargin) {
+                    resolve(true);
+                });
+            }
+            else {
+                resolve(true);
+            }
+        })
+
+    }).then(function (resUpdate) {
+        return resUpdate;
+    }).catch(function (err) {
+        //console.error('[' + moment().format('DD/MM/YYYY hh:mm:ss a') + '] ' + err.stack || err.message);
+        return true;
+    });
+}
+
 function userTransaction() {
 
     this.signup = async function (req, res) {
@@ -127,17 +189,14 @@ function userTransaction() {
                 if (chkUserExist != null) {
                     resolve({ auth: false, message: "email is already exist..." })
                 } else {
-                    var hashedPassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password)
-                    console.log("hashedPassword", hashedPassword)
+                    var hashedPassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password)                
                     var objUserReg = req.body
                     objUserReg.password = hashedPassword
                     objUserReg.createddate = new Date()
                     User.create(objUserReg).then(function (UserReg) {
                         if (UserReg != null) {
-                            var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: hashedPassword })
-
-                            console.log("token", token)
-                            var EmailLink = process.env.APIURl + "api/Confirm?token=" + token
+                            var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: hashedPassword }, config.SignupexpiresIn)
+                            var EmailLink = process.env.APIURl + "api/auth/Confirm?token=" + token
                             var body = '<h1><b>Thank You</b></h1><br>' +
                                 'Thanks for registering. Please follow the link below to complete your registration.<br>' + EmailLink;
                             var obj = {
@@ -170,7 +229,6 @@ function userTransaction() {
 
     this.verify = async function (req, res, decoded) {
         decoded = JSON.parse(decoded)
-        //sequelize.transaction(function (t) {
         return new Promise(function (resolve, reject) {
             return User.findOne({
                 where:
@@ -185,7 +243,7 @@ function userTransaction() {
                             resolve({ success: true, Location: "http://localhost:3000" })
                         })
                 } else {
-                    resolve({ success: false, message: "Invalid token " });
+                    resolve({ success: false, message: "Your verification is already done !" });
                 }
             })
         }).then(function (response) {
@@ -220,11 +278,11 @@ function userTransaction() {
                     });
                 } else {
 
-                    var token = tokenhandler.sign({ email: req.query.email })
+                    var token = tokenhandler.sign({ email: req.query.email }, config.VerifyexpiresIn)
 
                     var EmailLink = process.env.APIURl + "/ResetPassword?token=" + token
                     var body = '<h1><b>Reset Password</b></h1><br>' +
-                        'Please follow the link below to Reset your Password.<br>' + EmailLink;
+                        'Please follow the link below to Reset your Password.<br>' + EmailLink + '<br>Please above link use in 10 minutes';
                     var obj = {
                         email: response.email,
                         subject: "Reset Password",
@@ -327,16 +385,117 @@ function userTransaction() {
         });
     }
 
-    // this.checkuser = async function (decoded, callback) {
-    //     User.findOne({ where: { email: decoded.email, isaccountverify: true } }).then(function (UserExist) {
-    //         if (UserExist != null) {
-    //             return callback(UserExist)
-    //         }
-    //         else {
-    //             return callback(null)
-    //         }
-    //     })
-    // }
+    this.checkuser = async function (req, res) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({ where: { email: req.query.email, isaccountverify: true } }).then(function (UserExist) {
+                if (UserExist != null) {
+                    resolve(true)
+                }
+                else {
+                    resolve(false)
+                }
+            })
+        }).then(function (response) {
+            if (response) {
+                return { success: true };
+            } else {
+                return { success: false, message: "Invalid token" };
+            }
+        }).catch(function (err) {
+            return {
+                success: false,
+                message: err.message,
+            };
+        });
+    }
+
+    this.share = async function (req, res) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({ where: { email: req.body.email } }).then(function (UserExist) {
+                if (UserExist != null) {
+                    var objShare = new Object();
+                    objShare.iduser = req.query.iduser;
+                    objShare.idmedia = req.query.idmedia;
+                    objShare.idtouser = UserExist.id;
+                    objShare.createdate = new Date();
+                    objShare.createdby = req.query.email;
+                    Share.findOrCreate({
+                        where:
+                        {
+                            iduser: req.query.iduser,
+                            idtouser: UserExist.id,
+                            idmedia: req.query.idmedia,
+                        },
+                        defaults: objShare
+                    }).then(function (ShareResponse) {
+                        var obj = {
+                            email: req.query.email,
+                            message: req.query.email + 'shared photo with you'
+                        }
+                        io.sockets.emit(req.body.email + '-notifications', obj);
+                        resolve({ success: true, message: "File Share successfully" })
+                    })
+                }
+                else {
+                    var objInvite = new Object();
+                    objInvite.iduser = req.query.iduser;
+                    objInvite.email = req.body.email;
+                    Invite.findOrCreate({
+                        where:
+                        {
+                            iduser: req.query.iduser,
+                            email: req.body.email,
+                            isaccept: 0
+
+                        },
+                        defaults: objInvite
+                    }).then(function (InviteResponse) {
+                        //var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: hashedPassword }, config.SignupexpiresIn)
+                        var EmailLink = "http://localhost:3000"
+
+                        var body = '<b>Hi,</b><br>' +
+                            'Your are Invited from ' + req.query.email + '<br>' +
+                            'Please follow the link below to registration.<br>' + EmailLink;
+
+
+                        var obj = {
+                            email: req.body.email,
+                            subject: "Invitation Mail",
+                            body: body,
+                        }
+                        return emailhandler.sendemail(obj).then(function () {
+
+                            var objShare = new Object();
+                            objShare.iduser = req.query.iduser;
+                            objShare.idmedia = req.query.idmedia;
+                            objShare.createdate = new Date();
+                            objShare.createdby = req.query.email;
+                            objShare.idinvited = InviteResponse[0].id
+
+                            Share.findOrCreate({
+                                where:
+                                {
+                                    iduser: req.query.iduser,
+                                    idmedia: req.query.idmedia,
+                                    idinvited: InviteResponse[0].id
+                                },
+                                defaults: objShare
+                            }).then(function (ShareResponse) {
+                                resolve({ success: true, message: "File Share successfully" })
+                            })
+                        })
+                    })
+                }
+            })
+        }).then(function (response) {
+            return response
+        }).catch(function (err) {
+            return {
+                success: false,
+                message: err.message,
+            };
+        });
+    }
 
 }
 

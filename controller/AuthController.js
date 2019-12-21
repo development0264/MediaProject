@@ -1,17 +1,13 @@
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
-var tokenhandler = require('../Utils/tokenhandler');
-var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
-var validator = require('validator');
-const isAuthorized = require('./requestAuthenticator')
-var userTransaction = require('../services/userservices');
+var User = require('../data_accesss/user');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
 router.post('/signup', async (req, res) => {
-    var response = await userTransaction.signup(req, res);
+    var response = await User.signup(req, res);
     if (response.success) {
         res.status(200).send(response).end();
     }
@@ -21,7 +17,8 @@ router.post('/signup', async (req, res) => {
 })
 
 router.get('/verify', async (req, res) => {
-    var response = await userTransaction.verify(req, res, req.query.decoded);
+
+    var response = await User.verify(req, res, req.query.decoded);
     if (response.success) {
         res.writeHead(301,
             { Location: response.Location }
@@ -34,11 +31,11 @@ router.get('/verify', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-    await userTransaction.login(req, res);
+    await User.login(req, res);
 })
 
 router.get('/forgotpassword', async (req, res) => {
-    var response = await userTransaction.forgotpassword(req, res);
+    var response = await User.forgotpassword(req, res);
     if (response.success) {
         res.status(200).send(response).end();
     }
@@ -48,7 +45,7 @@ router.get('/forgotpassword', async (req, res) => {
 });
 
 router.get('/resetverification', async (req, res) => {
-    var response = await userTransaction.resetverification(req, res);
+    var response = await User.resetverification(req, res);
     if (response.success) {
         res.writeHead(301,
             { Location: response.Location }
@@ -61,9 +58,7 @@ router.get('/resetverification', async (req, res) => {
 });
 
 router.post('/request', async (req, res) => {
-
-    var response = await userTransaction.request(req, res);
-    console.log(response)
+    var response = await User.request(req, res);
     if (response.success) {
         res.writeHead(301,
             { Location: response.Location }
@@ -76,8 +71,17 @@ router.post('/request', async (req, res) => {
 });
 
 router.post('/confirm', async (req, res) => {
+    var response = await User.confirm(req, res);
+    if (response.success) {
+        res.status(200).send(response).end();
+    }
+    else {
+        res.status(200).send(response).end();
+    }
+});
 
-    var response = await userTransaction.confirm(req, res);
+router.get('/check', async (req, res) => {
+    var response = await User.checkuser(req, res);
     if (response.success) {
         res.status(200).send(response).end();
     }

@@ -1,6 +1,5 @@
 var generatePassword = require("password-generator");
 var bcrypt = require('bcryptjs');
-var userTransaction = require('../services/userservices');
 
 var maxLength = 10;
 var minLength = 8;

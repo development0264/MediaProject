@@ -1,5 +1,5 @@
 
-var Mediaservices = require('../services/mediaservices');
+var Media = require('../data_accesss/media');
 var Commonfunction = require('./common.js');
 var formidable = require('formidable');
 var fs = require('fs');
@@ -33,7 +33,7 @@ function imagevideohandler() {
             });
             form.on('end', function () {
                 if (Image["FileName"] != "") {
-                    Mediaservices.saveImage(Image["decoded"], Image["FileName"]).then(function (upload) {
+                    Media.saveImage(Image["decoded"], Image["FileName"]).then(function (upload) {
                         resolve(upload)
                     })
                 }
@@ -75,7 +75,7 @@ function imagevideohandler() {
             });
             form.on('end', function () {
                 if (Video["FileName"] != "") {
-                    Mediaservices.savevideo(Video["decoded"], Video["FileName"]).then(function (upload) {
+                    Media.savevideo(Video["decoded"], Video["FileName"]).then(function (upload) {
                         resolve(upload);
                     })
                 }
@@ -137,12 +137,12 @@ function imagevideohandler() {
                 function uploader(i) {
                     if (i < FileName.length) {
                         if (FileName[i].Type == "Image") {
-                            Mediaservices.saveImage(req.decoded, FileName[i].Name).then(function (upload) {
+                            Media.saveImage(req.decoded, FileName[i].Name).then(function (upload) {
                                 uploader(i + 1);
                             })
                         }
                         else if (FileName[i].Type == "Video") {
-                            Mediaservices.savevideo(req.decoded, FileName[i].Name).then(function (upload) {
+                            Media.savevideo(req.decoded, FileName[i].Name).then(function (upload) {
                                 uploader(i + 1);
                             })
                         }

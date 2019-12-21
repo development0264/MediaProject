@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('tbluserimages', {
+  return sequelize.define('tblinviteduser', {
     id: {
       type: DataTypes.INTEGER(11),
       allowNull: false,
@@ -12,19 +12,16 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.INTEGER(11),
       allowNull: true
     },
-    imagename: {
+    email: {
       type: DataTypes.STRING(200),
       allowNull: true
     },
-    createdby: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    createddate: {
-      type: DataTypes.DATE,
-      allowNull: true
+    isaccept: {
+      type: DataTypes.INTEGER(1),
+      allowNull: true,
+      defaultValue: '0'
     }
   }, {
-    tableName: 'tbluserimages'
+    tableName: 'tblinviteduser'
   });
 };
