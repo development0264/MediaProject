@@ -40,9 +40,13 @@ router.post('/auth/signup', async (req, res) => {
     } else {
         api.post(req.path, req.body, {
         }).then((responseFromServer2) => {
-            res.send(responseFromServer2.data)
+            if (responseFromServer2.data.success) {
+                res.status(200).send(responseFromServer2.data)
+            } else {
+                res.status(409).send(responseFromServer2.data)
+            }
         }).catch((err) => {
-            res.send(err)
+            res.status(417).send(err)
         })
     }
 })
@@ -65,9 +69,13 @@ router.post('/auth/login', async (req, res) => {
     try {
         api.post(req.path, req.body, {
         }).then((responseFromServer2) => {
-            res.send(responseFromServer2.data)
+            if (responseFromServer2.data.success) {
+                res.status(200).send(responseFromServer2.data)
+            } else {
+                res.status(401).send(responseFromServer2.data)
+            }
         }).catch((err) => {
-            res.send(err)
+            res.status(417).send(err)
         })
     } catch (err) {
         res.status(500).end();
@@ -80,9 +88,13 @@ router.get('/auth/forgotpassword', async (req, res) => {
             email: req.query.email
         }
     }).then((responseFromServer2) => {
-        res.send(responseFromServer2.data)
+        if (responseFromServer2.data.success) {
+            res.status(200).send(responseFromServer2.data)
+        } else {
+            res.status(401).send(responseFromServer2.data)
+        }
     }).catch((err) => {
-        res.send(err)
+        res.status(417).send(err)
     })
 });
 
@@ -92,9 +104,13 @@ router.get('/auth/resetverification', isAuthorized, async (req, res, next) => {
             email: req.decoded.email
         }
     }).then((responseFromServer2) => {
-        res.send(responseFromServer2.data)
+        if (responseFromServer2.data.success) {
+            res.status(200).send(responseFromServer2.data)
+        } else {
+            res.status(401).send(responseFromServer2.data)
+        }
     }).catch((err) => {
-        res.send(err)
+        res.status(417).send(err)
     })
 });
 
@@ -102,11 +118,15 @@ router.post('/auth/request', async (req, res) => {
     tokenhandler.verify(req.body.token)
         .then(function (decoded) {
             api.post(req.path, decoded).then((responseFromServer2) => {
-                res.send(responseFromServer2.data)
+                if (responseFromServer2.data.success) {
+                    res.status(200).send(responseFromServer2.data)
+                } else {
+                    res.status(401).send(responseFromServer2.data)
+                }
             }).catch((err) => {
-                res.send(err)
+                res.status(417).send(err)
             })
-        }).catch((error) => req.send('error: ', error));
+        }).catch((error) => res.status(417).send(error));
 
 
 });
@@ -132,9 +152,13 @@ router.post('/auth/confirm', isAuthorized, async (req, res) => {
                 email: req.decoded.email
             }
         }).then((responseFromServer2) => {
-            res.send(responseFromServer2.data)
+            if (responseFromServer2.data.success) {
+                res.status(200).send(responseFromServer2.data)
+            } else {
+                res.status(401).send(responseFromServer2.data)
+            }
         }).catch((err) => {
-            res.send(err)
+            res.status(417).send(err)
         })
         // }).catch((error) => req.send('error: ', error));
     }
