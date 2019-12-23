@@ -31,6 +31,11 @@ module.exports = function (sequelize, DataTypes) {
     idinvited: {
       type: DataTypes.INTEGER(11),
       allowNull: true
+    },
+    isread: {
+      type: DataTypes.INTEGER(1),
+      allowNull: true,
+      defaultValue: '0'
     }
   }, {
     tableName: 'tblshare'

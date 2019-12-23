@@ -413,28 +413,33 @@ function userTransaction() {
         return new Promise(function (resolve, reject) {
             return User.findOne({ where: { email: req.body.email } }).then(function (UserExist) {
                 if (UserExist != null) {
-                    var objShare = new Object();
-                    objShare.iduser = req.query.iduser;
-                    objShare.idmedia = req.query.idmedia;
-                    objShare.idtouser = UserExist.id;
-                    objShare.createdate = new Date();
-                    objShare.createdby = req.query.email;
-                    Share.findOrCreate({
-                        where:
-                        {
-                            iduser: req.query.iduser,
-                            idtouser: UserExist.id,
-                            idmedia: req.query.idmedia,
-                        },
-                        defaults: objShare
-                    }).then(function (ShareResponse) {
-                        var obj = {
-                            email: req.query.email,
-                            message: req.query.email + 'shared photo with you'
-                        }
-                        io.sockets.emit(req.body.email + '-notifications', obj);
-                        resolve({ success: true, message: "File Share successfully" })
-                    })
+                    if (req.query.iduser == UserExist.id) {
+                        reject({ success: false, message: "Media doesn't share with you.." })
+                    }
+                    else {
+                        var objShare = new Object();
+                        objShare.iduser = req.query.iduser;
+                        objShare.idmedia = req.query.idmedia;
+                        objShare.idtouser = UserExist.id;
+                        objShare.createdate = new Date();
+                        objShare.createdby = req.query.email;
+                        Share.findOrCreate({
+                            where:
+                            {
+                                iduser: req.query.iduser,
+                                idtouser: UserExist.id,
+                                idmedia: req.query.idmedia,
+                            },
+                            defaults: objShare
+                        }).then(function (ShareResponse) {
+                            var obj = {
+                                email: req.query.email,
+                                message: req.query.email + 'shared photo with you'
+                            }
+                            io.sockets.emit(req.body.email + '-notifications', obj);
+                            resolve({ success: true, message: "File Share successfully" })
+                        })
+                    }
                 }
                 else {
                     var objInvite = new Object();

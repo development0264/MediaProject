@@ -1,0 +1,15 @@
+div.container {
+    text-align: center;
+    width: 100vw;
+}
+
+div.container > h2 {
+    font-family: 'Anton', sans-serif;
+    font-size:90px;
+    opacity: 0.8;
+}
+
+span {
+    font-family: Roboto;
+    font-size: 20px;
+}

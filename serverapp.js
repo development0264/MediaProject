@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 })
 
 app.use(express.static(__dirname + '/'));
-app.use('/upload', require('./controller/MediaController'))
+app.use('/media', require('./controller/MediaController'))
 app.use('/auth', require('./controller/AuthController'))
 
 // for Socket

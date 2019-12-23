@@ -1,0 +1,27 @@
+<div class="signin-content animated fadeIn">
+    <mat-card>
+        <mat-card-content>
+            <img src="../../../assets/img/1.png" width="200px">
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <mat-form-field class="full-width-input">
+                    <input matInput placeholder="User" formControlName="email" required>
+                    <mat-error *ngIf="isFieldInvalid('email')">
+                        Please inform your user name
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="full-width-input separate">
+                    <input matInput type="password" placeholder="Password" formControlName="password" required>
+                    <mat-error *ngIf="isFieldInvalid('password')">
+                        Please inform your password
+                    </mat-error>
+                </mat-form-field>
+                <button mat-raised-button color="primary" type="submit">Login</button>
+                <br>
+                <br>
+                <a mat-raised-button style="background-color: red;color: white;" (click)="Signup()">Sign
+                    up</a>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

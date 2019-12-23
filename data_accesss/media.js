@@ -1,7 +1,7 @@
 var models = require('../models');
 var sequelize = models.sequelize;
-var UserMedia = models.tblusermedia;
-
+var Usershare = models.tblshare;
+var u = require('underscore');
 
 function userImage() {
 
@@ -47,6 +47,45 @@ function userImage() {
             })
         }).then(function (response) {
             return (response)
+        }).catch(function (err) {
+            return ({
+                success: false,
+                message: err.message,
+            });
+        });
+    }
+
+    this.notificationcount = async function (req, res) {
+        return sequelize.transaction(function (t) {
+            return Usershare.findAndCountAll({ where: { iduser: req.query.iduser } }).then(function (response) {
+                var unreadmessage = 0
+                if (response.rows.length > 0) {
+                    unreadmessage = u.filter(response.rows, { isread: 0 });
+
+                }
+                return { success: true, data: response.rows, unreadcount: unreadmessage.length }
+            })
+        }).then(function (response) {
+            return response
+        }).catch(function (err) {
+            return ({
+                success: false,
+                message: err.message,
+            });
+        });
+    }
+
+    this.notificationupdate = async function (req, res) {
+        return sequelize.transaction(function (t) {
+            return Usershare.update({ isread: true }, { where: { iduser: req.query.iduser, id: req.query.idshare } }).then(function (response) {
+                return {
+                    success: true,
+                    message: "Notification updated successfully...",
+                    data: response
+                }
+            })
+        }).then(function (response) {
+            return response
         }).catch(function (err) {
             return ({
                 success: false,
