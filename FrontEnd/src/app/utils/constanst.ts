@@ -5,13 +5,19 @@ export const CONSTANST = {
     routes: {
         authorization: {
             login: HOST + '/api/auth/login',
-            signup: HOST + '/api/auth/signup'
+            signup: HOST + '/api/auth/signup',
+            forgotpassword: HOST + '/api/auth/forgotpassword',
+            request: HOST + '/api/auth/request',
+            confirm: HOST + '/api/auth/confirm'
         },
-        person: {
-            list: HOST + '/api/person',
-            delete: HOST + '/api/person/delete/:id',
-            save: HOST + '/api/person/save',
-            get: HOST + '/api/person/:id'
+        media: {
+            list: HOST + '/api/media/list',
+            photo: HOST + '/api/media/photo',
+            video: HOST + '/api/media/video',
+            photoandvideo: HOST + '/api/media/photoandvideo',
+            share: HOST + '/api/media/share',
+            notificationcount: HOST + '/api/media/notificationcount',
+            notificationupdate: HOST + '/api/media/notificationupdate',
         },
         user: {}
     },

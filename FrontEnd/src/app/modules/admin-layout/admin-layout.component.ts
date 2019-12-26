@@ -10,10 +10,17 @@ import {
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { AdminlayoutService } from './admin-layout.service';
+
 
 // LOGOUT CONFIRM DIALOG
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmComponent } from '../../components/confirm/confirm.component';
+
+import { MediaService } from '../../services/media.service';
+
+import * as io from 'socket.io-client';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'app-admin-layout',
@@ -26,6 +33,9 @@ export class AdminLayoutComponent implements OnInit {
     isLoggedIn$: Observable<boolean>;
     mobileQuery: MediaQueryList;
     private _mobileQueryListener: () => void;
+    private url = 'http://localhost:3000';
+    private socket;
+    notificationcount = 0
 
     @ViewChild('progressBar', { static: false })
     progressBar: ElementRef;
@@ -38,7 +48,10 @@ export class AdminLayoutComponent implements OnInit {
 
         private router: Router,
         private ngZone: NgZone,
-        private renderer: Renderer2
+        private renderer: Renderer2,
+        public snack: MatSnackBar,
+        private mediaService: MediaService,
+        private adminlayoutService: AdminlayoutService
     ) {
         this.mobileQuery = media.matchMedia('(max-width: 600px)');
         this._mobileQueryListener = () => changeDetectorRef.detectChanges();
@@ -47,10 +60,40 @@ export class AdminLayoutComponent implements OnInit {
         router.events.subscribe((event: RouterEvent) => {
             this._navigationInterceptor(event)
         });
+        this.socket = io(this.url);
+
     }
+
+    public getMessages = () => {
+        return Observable.create((observer) => {
+            this.socket.on(localStorage.getItem('email') + '-notifications', (message) => {
+                observer.next(message);
+            });
+        });
+    }
+
+
 
     ngOnInit() {
         this.isLoggedIn$ = this.authService.isLoggedIn;
+        this.getnotificationcount();
+        this.getMessages().subscribe((message: any) => {
+            this.snack.open(message.message, 'Close',
+                {
+                    duration: 3500, verticalPosition: 'top'
+                });
+            this.getnotificationcount();
+        })
+
+        this.adminlayoutService.change.subscribe(isOpen => {
+            this.getnotificationcount();
+        });
+    }
+
+    getnotificationcount() {
+        this.mediaService.notificationcount().subscribe((data: any) => {
+            this.notificationcount = data.unreadcount
+        })
     }
 
     ngOnDestroy(): void {

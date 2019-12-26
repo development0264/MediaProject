@@ -6,8 +6,8 @@ var Media = require('../data_accesss/media');
 var User = require('../data_accesss/user');
 
 
-router.post('/photo', async (req, res) => {
-    var response = await imagevideohandler.imageupload(req, res)
+router.get('/list', async (req, res) => {
+    var response = await Media.list(req, res)
     if (response.success) {
         res.status(200).send(response).end();
     }
@@ -16,8 +16,8 @@ router.post('/photo', async (req, res) => {
     }
 });
 
-router.post('/video', async (req, res) => {
-    var response = await imagevideohandler.videoupload(req, res)
+router.post('/photo', isAuthorized, async (req, res) => {
+    var response = await imagevideohandler.imagevideoupload(req, res)
     if (response.success) {
         res.status(200).send(response).end();
     }
@@ -26,7 +26,17 @@ router.post('/video', async (req, res) => {
     }
 });
 
-router.post('/photoandvideo', async (req, res) => {
+router.post('/video', isAuthorized, async (req, res) => {
+    var response = await imagevideohandler.imagevideoupload(req, res)
+    if (response.success) {
+        res.status(200).send(response).end();
+    }
+    else {
+        res.status(200).send(response).end();
+    }
+});
+
+router.post('/photoandvideo', isAuthorized, async (req, res) => {
     var response = await imagevideohandler.imagevideoupload(req, res)
     if (response.success) {
         res.status(200).send(response).end();

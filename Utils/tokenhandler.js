@@ -11,9 +11,31 @@ function tokenhandler() {
         return jwt.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: UserReg.password }, config.secret, { expiresIn: expiresIn })
     }
 
+    this.forgotpasswordsign = function (UserReg, expiresIn) {
+        return jwt.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: UserReg.password }, config.forgotsecret, { expiresIn: expiresIn })
+    }
+
     this.verify = async function (token, args) {
         return new Promise(function (resolve, reject) {
             jwt.verify(token, config.secret, (err, decoded) => {
+                if (err) {
+                    reject({ success: false, message: "Token is invalid or expired" })
+                } else {
+                    resolve(decoded)
+                }
+            })
+        }).then(function (resUpdate) {
+            return resUpdate;
+        }).catch(function (err) {
+            //console.error('[' + moment().format('DD/MM/YYYY hh:mm:ss a') + '] ' + err.stack || err.message);
+            throw err;
+        });
+    }
+
+    this.tokenverify = async function (token, args) {
+        return new Promise(function (resolve, reject) {
+            jwt.verify(token, config.forgotsecret, (err, decoded) => {
+                console.log(decoded)
                 if (err) {
                     reject({ success: false, message: "Token is invalid or expired" })
                 } else {
@@ -52,17 +74,6 @@ function tokenhandler() {
                         }).catch((err) => {
                             reject({ success: false, message: "Token is invalid or expired" })
                         })
-
-                        // console.log(decoded)
-                        // var response = await userTransaction.checkuser(decoded);
-                        // console.log("response", response)
-                        // if (response.success) {
-                        //     req.decoded = decoded;
-                        //     next()
-                        // }
-                        // else {
-                        //     reject({ success: false, message: "Token is invalid or expired" })
-                        // }
                     }
                 })
             }
@@ -73,6 +84,7 @@ function tokenhandler() {
             res.send(err)
         });
     }
+
 }
 
-module.exports = new tokenhandler(); 
+module.exports = new tokenhandler();

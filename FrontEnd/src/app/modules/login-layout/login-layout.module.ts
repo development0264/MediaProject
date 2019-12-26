@@ -5,6 +5,8 @@ import { SharedModule } from './../../utils/shared.module';
 import { LoginLayoutComponent } from './login-layout.component';
 import { LoginComponent } from './login/login.component';
 import { SignupComponent } from './signup/signup.component';
+import { ForgotPasswordComponent } from './forgotpassword/forgotpassword.component';
+import { ResetPasswordComponent } from './resetpassword/resetpassword.component';
 
 @NgModule({
     imports: [
@@ -14,7 +16,9 @@ import { SignupComponent } from './signup/signup.component';
     declarations: [
         LoginLayoutComponent,
         LoginComponent,
-        SignupComponent
+        SignupComponent,
+        ForgotPasswordComponent,
+        ResetPasswordComponent
     ],
     providers: [],
     exports: []

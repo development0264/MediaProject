@@ -3,6 +3,7 @@ var express = require('express');
 var compression = require('compression');
 var router = require('./routers/router')
 var bodyParser = require('body-parser');
+var passport = require('passport');
 var app = express();
 app.use(compression())
 
@@ -11,6 +12,13 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
     limit: '50mb',
     extended: true
 }));
+
+app.use(passport.initialize());
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,Authorization, Access-Control-Allow-Headers");
+    next();
+});
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');

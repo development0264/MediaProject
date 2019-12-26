@@ -12,12 +12,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.css'],
+    templateUrl: './forgotpassword.component.html',
+    styleUrls: ['./forgotpassword.component.css'],
     providers: []
 })
 
-export class LoginComponent implements OnInit {
+export class ForgotPasswordComponent implements OnInit {
     form: FormGroup;
     private formSubmitAttempt: boolean;
 
@@ -37,8 +37,7 @@ export class LoginComponent implements OnInit {
         }
 
         this.form = this.fb.group({
-            email: ['', Validators.required],
-            password: ['', Validators.required]
+            email: ['', [Validators.required, Validators.email]],
         });
     }
 
@@ -51,13 +50,8 @@ export class LoginComponent implements OnInit {
 
     onSubmit() {
         if (this.form.valid) {
-            this.authService.login(this.form.value).subscribe((data: any) => {
+            this.authService.forgotpassword(this.form.value).subscribe((data: any) => {
                 if (data.success) {
-                    this.authService.loggedIn.next(true); /*SETEA EL METODO loggedIn COMO TRUE EN EL AuthService*/
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('iduser', data.data.id);
-                    localStorage.setItem('email', data.data.email); /*SETEA EL TOKEN PROCEDENTE DEL BACKEND*/
-                    this.router.navigate(['/']); /*REDIRECCIONA AL DASHBOAR*/
                     this.snack.openFromComponent(SnackbarComponent, {
                         data: { data: data },
                         verticalPosition: 'top',
@@ -74,11 +68,7 @@ export class LoginComponent implements OnInit {
         this.formSubmitAttempt = true;
     }
 
-    Signup() {
-        this.router.navigate(['/signup']);
-    }
-
-    ForgotPassword() {
-        this.router.navigate(['/forgotpassword']);
+    Login() {
+        this.router.navigate(['/login']);
     }
 }

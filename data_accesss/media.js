@@ -1,18 +1,62 @@
 var models = require('../models');
 var sequelize = models.sequelize;
 var Usershare = models.tblshare;
+var Media = models.tblusermedia;
+var User = models.tbluser;
 var u = require('underscore');
 
 function userImage() {
 
-    this.saveImage = async function (decode, Filename) {
+    this.list = async function (req, res) {
         return sequelize.transaction(function (t) {
-            return UserMedia.create({
+            var objParam = req.query;
+            var Orderby = objParam.active + ' ' + objParam.order;
+            var search = {};
+            search['$and'] = [];
+            if (objParam.iduser != null && objParam.iduser != '' && objParam.iduser != undefined) {
+                var objSearch = {
+                    ['iduser']: {
+                        ['$eq']: objParam.iduser
+                    }
+                }
+                search['$and'].push(objSearch);
+            }
+
+
+            return Media.findAndCountAll({
+                where: search,
+                order: Orderby,
+                offset: parseInt(objParam.start),
+                limit: parseInt(objParam.length),
+            }).then(function (response) {
+
+                var response1 = new Object();
+                response1.success = true;
+                response1.draw = objParam.draw;
+                response1.recordsTotal = response.count;
+                response1.recordsFiltered = response.count;
+                response1.data = response.rows;
+                return response1;
+
+            })
+        }).then(function (response) {
+            return response
+        }).catch(function (err) {
+            return ({
+                success: false,
+                message: err.message,
+            });
+        });
+    }
+
+    this.SaveMedia = async function (decode, Filename) {
+        return sequelize.transaction(function (t) {
+            return Media.create({
                 iduser: decode.id,
-                filename: Filename,
+                filename: Filename.Name,
                 createdby: decode.name,
                 createddate: new Date(),
-                Type: 'Image'
+                Type: Filename.Type
             }).then(function (create) {
                 if (create) {
                     return { success: true, message: "Image Uploaded Successfully...", data: create }
@@ -32,13 +76,14 @@ function userImage() {
 
     this.savevideo = async function (decode, Filename) {
         return sequelize.transaction(function (t) {
-            return UserMedia.create({
+            return Media.create({
                 iduser: decode.id,
                 filename: Filename,
                 createdby: decode.name,
                 createddate: new Date(),
                 Type: 'Video'
             }).then(function (create) {
+                console.log(create)
                 if (create) {
                     return { success: true, message: "Video Uploaded Successfully...", data: create }
                 } else {
@@ -57,7 +102,20 @@ function userImage() {
 
     this.notificationcount = async function (req, res) {
         return sequelize.transaction(function (t) {
-            return Usershare.findAndCountAll({ where: { iduser: req.query.iduser } }).then(function (response) {
+            Usershare.belongsTo(User, {
+                foreignKey: {
+                    name: 'iduser',
+                    allowNull: false
+                }
+            });
+
+            return Usershare.findAndCountAll({
+                where: { idtouser: req.query.iduser },
+                include: [{
+                    model: User,
+                    required: true,
+                }]
+            }).then(function (response) {
                 var unreadmessage = 0
                 if (response.rows.length > 0) {
                     unreadmessage = u.filter(response.rows, { isread: 0 });
@@ -77,7 +135,7 @@ function userImage() {
 
     this.notificationupdate = async function (req, res) {
         return sequelize.transaction(function (t) {
-            return Usershare.update({ isread: true }, { where: { iduser: req.query.iduser, id: req.query.idshare } }).then(function (response) {
+            return Usershare.update({ isread: true }, { where: { idtouser: req.query.iduser, id: req.query.idshare } }).then(function (response) {
                 return {
                     success: true,
                     message: "Notification updated successfully...",

@@ -11,7 +11,7 @@ import { SnackbarComponent } from '../components/snackbar/snackbar.component';
 import { MatSnackBar } from '@angular/material';
 
 @Injectable()
-export class AuthService implements OnInit {
+export class AuthService {
     public loggedIn = new BehaviorSubject<boolean>(this.hasToken());
 
     get isLoggedIn() {
@@ -57,6 +57,7 @@ export class AuthService implements OnInit {
             }).pipe(
                 catchError((err: any) => {
                     if (err instanceof HttpErrorResponse) {
+                        console.log(err.error.message)
                         this.snack.open(err.error.message, 'Close',
                             {
                                 duration: 3500, verticalPosition: 'top', panelClass: 'snack-error'
@@ -67,9 +68,63 @@ export class AuthService implements OnInit {
         }
     }
 
-    logout() {
-        return this.http.get(CONSTANST.routes.authorization.logout, { headers: this.headers });
+    forgotpassword(user: User): Observable<any> {
+        if (user.email !== '') {
+            var param = {
+                email: user.email
+            }
+            return this.http.get(CONSTANST.routes.authorization.forgotpassword, { params: param })
+                .pipe(
+                    catchError((err: any) => {
+                        if (err instanceof HttpErrorResponse) {
+                            this.snack.open(err.error.message, 'Close',
+                                {
+                                    duration: 3500, verticalPosition: 'top', panelClass: 'snack-error'
+                                });
+                        }
+                        return of(err.error.message);
+                    }));
+        }
     }
+
+    request(token: string): Observable<any> {
+        if (token !== '') {
+            return this.http.post(CONSTANST.routes.authorization.request, {
+                token: token,
+            }).pipe(
+                catchError((err: any) => {
+                    if (err instanceof HttpErrorResponse) {
+                        console.log(err.error.message)
+                        this.snack.open(err.error.message, 'Close',
+                            {
+                                duration: 3500, verticalPosition: 'top', panelClass: 'snack-error'
+                            });
+                    }
+                    return of(err.error.message);
+                }));
+        }
+    }
+
+    confirm(user: User): Observable<any> {
+        if (user.password !== '') {
+            return this.http.post(CONSTANST.routes.authorization.confirm, {
+                token: user.token,
+                password: user.password,
+                confirmpassword: user.confirmpassword
+            }).pipe(
+                catchError((err: any) => {
+                    if (err instanceof HttpErrorResponse) {
+                        console.log(err.error.message)
+                        this.snack.open(err.error.message, 'Close',
+                            {
+                                duration: 3500, verticalPosition: 'top', panelClass: 'snack-error'
+                            });
+                    }
+                    return of(err.error.message);
+                }));
+        }
+    }
+
 
     hasToken(): boolean {
         return !!localStorage.getItem('token');

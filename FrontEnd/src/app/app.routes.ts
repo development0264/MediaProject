@@ -10,11 +10,13 @@ import { AuthGuard } from './guards/auth.guard';
 UNA IMPORTACIÓN POR CADA COMPONENTE DE LAS VISTAS*/
 import {
     ContactUsComponent,
-    TablesComponent,
+    NotificationComponent,
     LoginComponent,
     SignupComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    //PersonComponent,
     NotFoundComponent,
-    PersonComponent,
     UserComponent,
     DashboardComponent
 } from './utils/index.pages';
@@ -31,15 +33,16 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         children: [
             { path: '', component: DashboardComponent },
-            { path: 'person', component: PersonComponent },
             { path: 'contact-us', component: ContactUsComponent },
-            { path: 'table', component: TablesComponent }
+            { path: 'notification', component: NotificationComponent }
         ]
     },
     {
         path: '',
         component: LoginLayoutComponent,
         children: [
+            { path: 'resetpassword', component: ResetPasswordComponent },
+            { path: 'forgotpassword', component: ForgotPasswordComponent },
             { path: 'signup', component: SignupComponent },
             { path: 'login', component: LoginComponent },
             { path: '404', component: NotFoundComponent },

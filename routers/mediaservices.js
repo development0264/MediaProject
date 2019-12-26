@@ -10,13 +10,33 @@ const api = apiAdapter(BASE_URL)
 var FormData = require('form-data');
 var multer = require('multer')();
 
+router.get('/media/list', isAuthorized, (req, res) => {
+    api.get(req.path, {
+        params: {
+            iduser: req.decoded.id,
+            active: req.query.active,
+            order: req.query.order,
+            search: req.query.search,
+            length: req.query.pageSize,
+            start: req.query.page,
+        }
+    }).then((responseFromServer2) => {
+        if (responseFromServer2.data.success) {
+            res.status(200).send(responseFromServer2.data)
+        } else {
+            res.status(401).send(responseFromServer2.data)
+        }
+    }).catch((err) => {
+        res.send(err)
+    })
+})
 
-router.post('/media/photo', multer.single('Image'), isAuthorized, (req, res) => {
-
-    const fileRecievedFromClient = req.file; //File Object sent in 'fileFieldName' field in multipart/form-data
-
+router.post('/media/photo', multer.array('files', 5), isAuthorized, (req, res) => {
     let form = new FormData();
-    form.append('Image', fileRecievedFromClient.buffer, fileRecievedFromClient.originalname);
+    for (var i = 0; i < req.files.length; i++) {
+        const fileRecievedFromClient = req.files[i];
+        form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+    }
 
     api.post(req.path, form, {
         headers: {
@@ -39,11 +59,14 @@ router.post('/media/photo', multer.single('Image'), isAuthorized, (req, res) => 
     })
 })
 
-router.post('/media/video', multer.single('Video'), isAuthorized, (req, res) => {
+router.post('/media/video', multer.array('files', 5), isAuthorized, (req, res) => {
 
-    const fileRecievedFromClient = req.file;
     let form = new FormData();
-    form.append('Video', fileRecievedFromClient.buffer, fileRecievedFromClient.originalname);
+    for (var i = 0; i < req.files.length; i++) {
+        const fileRecievedFromClient = req.files[i];
+        form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+    }
+
 
     api.post(req.path, form, {
         headers: {
@@ -66,12 +89,13 @@ router.post('/media/video', multer.single('Video'), isAuthorized, (req, res) => 
     })
 })
 
-var cpUpload = multer.fields([{ name: 'Image', maxCount: 10 }, { name: 'Video', maxCount: 10 }])
-router.post('/media/photoandvideo', cpUpload, isAuthorized, async (req, res) => {
+router.post('/media/photoandvideo', multer.array('files', 5), isAuthorized, async (req, res) => {
 
     let form = new FormData();
-    form.append('Image', req.files['Image'][0].buffer, req.files['Image'][0].originalname);
-    form.append('Video', req.files['Video'][0].buffer, req.files['Video'][0].originalname);
+    for (var i = 0; i < req.files.length; i++) {
+        const fileRecievedFromClient = req.files[i];
+        form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+    }
 
     api.post(req.path, form, {
         headers: {
@@ -80,7 +104,6 @@ router.post('/media/photoandvideo', cpUpload, isAuthorized, async (req, res) => 
                 'Authorization': req.headers['authorization'],
                 'Tokenconfig': config.secret
             }
-
         },
         'maxContentLength': Infinity,
         'maxBodyLength': Infinity
@@ -119,6 +142,7 @@ router.post('/media/share', isAuthorized, async (req, res) => {
 })
 
 router.get('/media/notificationcount', isAuthorized, async (req, res) => {
+    console.log(req.decoded.id)
     api.get(req.path, {
         params: {
             iduser: req.decoded.id

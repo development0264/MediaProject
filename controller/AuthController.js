@@ -19,11 +19,9 @@ router.post('/signup', async (req, res) => {
 router.get('/verify', async (req, res) => {
 
     var response = await User.verify(req, res, req.query.decoded);
+    console.log(response.Location)
     if (response.success) {
-        res.writeHead(301,
-            { Location: response.Location }
-        );
-        res.end()
+        res.status(200).send(response).end();
     }
     else {
         res.status(200).send(response).end();
@@ -60,10 +58,11 @@ router.get('/resetverification', async (req, res) => {
 router.post('/request', async (req, res) => {
     var response = await User.request(req, res);
     if (response.success) {
-        res.writeHead(301,
-            { Location: response.Location }
-        );
-        res.end()
+        // res.writeHead(301,
+        //     { Location: response.Location }
+        // );
+        // res.end()
+        res.status(200).send(response).end();
     }
     else {
         res.status(200).send(response).end();

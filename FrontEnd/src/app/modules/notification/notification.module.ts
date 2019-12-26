@@ -2,8 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from './../../utils/shared.module';
 
-import { PersonComponent } from './person.component';
-import { FormsComponent } from './forms/forms.component';
+import { NotificationComponent } from './notification.component';
 
 @NgModule({
     imports: [
@@ -11,14 +10,10 @@ import { FormsComponent } from './forms/forms.component';
         SharedModule
     ],
     declarations: [
-        PersonComponent,
-        FormsComponent
+        NotificationComponent,
     ],
     providers: [],
-    entryComponents: [
-        FormsComponent
-    ],
     exports: []
 })
-export class PersonModule {
+export class DashboardModule {
 }

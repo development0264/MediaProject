@@ -66,24 +66,6 @@ function GetUserNameFromDate() {
     return curr_year.toString() + curr_month.toString() + curr_date.toString() + hour.toString() + minutes.toString() + seconds.toString() + milisec.toString();
 }
 
-// function CheckValidToken(decoded, callback) {
-//     if (decoded) {
-//         userTransaction.checkuser(decoded, function (UserExist) {
-//             if (UserExist != null) {
-//                 console.log("calll")
-//                 return callback({
-//                     success: true,
-//                     message: "Valid token",
-//                     data: UserExist
-//                 });
-//             } else {
-//                 return callback(decoded);
-//             }
-//         })
-//     } else {
-//         return callback(InvalidToken);
-//     }
-// }
 
 module.exports = {
     customPassword: customPassword,

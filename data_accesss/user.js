@@ -196,7 +196,7 @@ function userTransaction() {
                     User.create(objUserReg).then(function (UserReg) {
                         if (UserReg != null) {
                             var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: hashedPassword }, config.SignupexpiresIn)
-                            var EmailLink = process.env.APIURl + "api/auth/Confirm?token=" + token
+                            var EmailLink = process.env.APIURl + "api/auth/verify?token=" + token
                             var body = '<h1><b>Thank You</b></h1><br>' +
                                 'Thanks for registering. Please follow the link below to complete your registration.<br>' + EmailLink;
                             var obj = {
@@ -240,7 +240,7 @@ function userTransaction() {
                 if (checkUserExist != null) {
                     checkUserExist.updateAttributes({ isaccountverify: true, modifieddate: new Date() })
                         .then(function (response) {
-                            resolve({ success: true, Location: "http://localhost:3000" })
+                            resolve({ success: true, Location: "http://localhost:4200/login" })
                         })
                 } else {
                     resolve({ success: false, message: "Your verification is already done !" });
@@ -278,9 +278,9 @@ function userTransaction() {
                     });
                 } else {
 
-                    var token = tokenhandler.sign({ email: req.query.email }, config.VerifyexpiresIn)
+                    var token = tokenhandler.forgotpasswordsign({ email: req.query.email }, config.VerifyexpiresIn)
 
-                    var EmailLink = process.env.APIURl + "/ResetPassword?token=" + token
+                    var EmailLink = process.env.Website_URL + "/resetpassword?token=" + token
                     var body = '<h1><b>Reset Password</b></h1><br>' +
                         'Please follow the link below to Reset your Password.<br>' + EmailLink + '<br>Please above link use in 10 minutes';
                     var obj = {
@@ -347,7 +347,7 @@ function userTransaction() {
             })
         }).then(function (response) {
             if (response) {
-                return { success: true, Location: "http://localhost:3000" };
+                return { success: true };
             } else {
                 return { success: false, message: "Invalid token : " + req.body.token };
             }
@@ -423,6 +423,8 @@ function userTransaction() {
                         objShare.idtouser = UserExist.id;
                         objShare.createdate = new Date();
                         objShare.createdby = req.query.email;
+                        objShare.title = req.body.title;
+                        objShare.description = req.body.description;
                         Share.findOrCreate({
                             where:
                             {

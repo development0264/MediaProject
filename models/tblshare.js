@@ -36,6 +36,14 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.INTEGER(1),
       allowNull: true,
       defaultValue: '0'
+    },
+    title: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    description: {
+      type: DataTypes.STRING(200),
+      allowNull: true
     }
   }, {
     tableName: 'tblshare'

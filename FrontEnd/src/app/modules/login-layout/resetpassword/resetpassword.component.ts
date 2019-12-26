@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
 
 // SERVICES
@@ -8,7 +8,7 @@ import { AuthService } from './../../../services/auth.service';
 
 // ERROR MESSAGE
 import { SnackbarComponent } from '../../../components/snackbar/snackbar.component';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 // import custom validator to validate that password and confirm password fields match
 import { ErrorStateMatcher } from '@angular/material/core';
@@ -24,14 +24,15 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
 
 @Component({
     selector: 'app-login',
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.css'],
+    templateUrl: './resetpassword.component.html',
+    styleUrls: ['./resetpassword.component.css'],
     providers: []
 })
 
-export class SignupComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit {
     form: FormGroup;
     private formSubmitAttempt: boolean;
+    private token: string;
     matcher = new MyErrorStateMatcher();
 
     constructor(
@@ -39,28 +40,37 @@ export class SignupComponent implements OnInit {
         private authService: AuthService,
         private router: Router,
         public snack: MatSnackBar,
-        private location: PlatformLocation
+        private location: PlatformLocation,
+        private route: ActivatedRoute
     ) {
-        this.form = this.fb.group({
-            name: [''],
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', Validators.required],
-            confirmpassword: ['']
-        }, {
-            validator: this.checkPasswords
-        });
     }
-
-    get f() { return this.form.controls; }
 
     ngOnInit() {
         /*SI EXISTE UN TOKEN SETEADO TE REDIRECCIONA AL DASHBOARD*/
         if (localStorage.getItem('token')) {
             this.router.navigate(['/']);
         }
+        this.token = this.route.snapshot.queryParamMap.get("token");
 
+        this.form = this.fb.group({
+            password: ['', Validators.required],
+            confirmpassword: [''],
+            token: this.token
+        }, {
+            validator: this.checkPasswords
+        });
+        this.requesttokencheck()
     }
 
+    requesttokencheck() {
+        if (this.token) {
+            this.authService.request(this.token).subscribe((data: any) => {
+                if (!data.success) {
+                    this.router.navigate(['**']);
+                }
+            })
+        }
+    }
 
     checkPasswords(group: FormGroup) { // here we have the 'passwords' group    
         let pass = group.controls.password.value;
@@ -78,27 +88,25 @@ export class SignupComponent implements OnInit {
 
     onSubmit() {
         if (this.form.valid) {
-            this.authService.signup(this.form.value).subscribe((data: any) => {
-                console.log(data)
+            this.authService.confirm(this.form.value).subscribe((data: any) => {
                 if (data.success) {
-                    //this.router.navigate(['/login']); /*REDIRECCIONA AL DASHBOAR*/
                     this.snack.open(data.message, 'Close',
                         {
                             duration: 3500, verticalPosition: 'top'
                         });
+                    this.router.navigate(['/login']);
                 } else { /*SINO MUESTRA UN MENSAJE DE ERROR PROCEDENTE DEL BACKEND*/
-                    // this.snack.openFromComponent(SnackbarComponent, {
-                    //     data: { data: data },
-                    //     duration: 3000
-                    // });
+                    this.snack.open(data.message, 'Close',
+                        {
+                            duration: 3500, verticalPosition: 'top'
+                        });
                 }
             })
         }
         this.formSubmitAttempt = true;
     }
 
-
-    Login() {
-        this.router.navigate(['/login']);
-    }
+    // Login() {
+    //     this.router.navigate(['/login']);
+    // }
 }

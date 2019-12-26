@@ -1,0 +1,47 @@
+<div class="container">
+    <h1 mat-dialog-title> {{ data.title }}</h1>
+    <div mat-dialog-content>
+        <div class="container">
+            <form [formGroup]="frm" (ngSubmit)='Share()'>
+
+                <mat-form-field>
+                    <input matInput placeholder="Title" formControlName="title" class="person-input">
+                    <mat-error *ngIf="isFieldInvalid('title')">
+                        Please enter title
+                    </mat-error>
+                </mat-form-field>
+
+                <br />
+
+                <mat-form-field>
+                    <input matInput placeholder="Description" formControlName="description" class="person-input">
+                    <mat-error *ngIf="isFieldInvalid('description')">
+                        Please enter description
+                    </mat-error>
+                </mat-form-field>
+
+                <br />
+
+                <mat-form-field>
+                    <input matInput placeholder="Email" formControlName="email" required class="person-input">
+                    <mat-error *ngIf="isFieldInvalid('email')">
+                        Please inform your email
+                    </mat-error>
+                    <mat-error *ngIf="isFieldInvalid('email')">
+                        Email must be a valid email address
+                    </mat-error>
+                </mat-form-field>
+
+                <br />
+
+                <div mat-dialog-actions align="end">
+                    <button mat-button [mat-dialog-close]>Cancel</button>
+                    <button mat-raised-button color="primary" type="submit" class="btnSave" [disabled]="!frm.valid">
+                        <mat-icon aria-label="icon-button">Share </mat-icon>
+                        <span>Share</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
