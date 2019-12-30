@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, NgZone, ElementRef, ViewChild, Renderer2 } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone, ElementRef, ViewChild, Renderer2, AfterViewInit } from '@angular/core';
 import {
     Router,
     Event as RouterEvent,
@@ -33,7 +33,7 @@ export class AdminLayoutComponent implements OnInit {
     isLoggedIn$: Observable<boolean>;
     mobileQuery: MediaQueryList;
     private _mobileQueryListener: () => void;
-    private url = 'http://localhost:3000';
+    private url = 'http://192.168.0.45:3000';
     private socket;
     notificationcount = 0
 

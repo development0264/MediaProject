@@ -1,9 +1,9 @@
 <div class="container animated fadeIn" [class.is-mobile]="mobileQuery.matches">
     <mat-toolbar class="toolbar" color="accent">
 
-        <!-- <button mat-icon-button (click)="snav.toggle()">
+        <button mat-icon-button (click)="snav.toggle()">
             <mat-icon class="menu">menu</mat-icon>
-        </button> -->
+        </button>
 
         <h1 class="menu" routerLink="/" style="cursor: pointer;">Media Project</h1>
         <span class="spacer"></span>
@@ -54,11 +54,11 @@
                     <i class="material-icons">dashboard</i>&nbsp;Dashboard
                 </a>
 
-                <a mat-list-item routerLink="/person">
-                    <i class="material-icons">person</i>&nbsp;Personas
+                <a mat-list-item routerLink="/shared">
+                    <i class="material-icons">Shared</i>&nbsp;Shared
                 </a>
 
-                <a mat-list-item routerLink="/contact-us">
+                <!-- <a mat-list-item routerLink="/contact-us">
                     <i class="material-icons">email</i>&nbsp;Contactanos
                 </a>
 
@@ -67,13 +67,26 @@
                 </a>
 
                 <a mat-list-item routerLink="/404">
-                    <i class="material-icons">error_outline</i>&nbsp;Error page
-                </a>
+                    <i class="material-icons">error_outline</i>&nbsp;Error page 
+                </a> -->
             </mat-nav-list>
         </mat-sidenav>
 
         <mat-sidenav-content>
             <router-outlet></router-outlet>
+
+            <footer class="footer">
+
+                <!-- Copyright -->
+                <div class="footer-copyright text-center py-3">© 2019 Copyright
+                </div>
+                <!-- Copyright -->
+            </footer>
         </mat-sidenav-content>
+
+
+
     </mat-sidenav-container>
+
+
 </div>

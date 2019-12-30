@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from './../../utils/shared.module';
 
-import { NotificationComponent } from './notification.component';
+import { SharedComponent } from './shared.component';
+
 
 @NgModule({
     imports: [
@@ -10,10 +11,10 @@ import { NotificationComponent } from './notification.component';
         SharedModule
     ],
     declarations: [
-        NotificationComponent,
+        SharedComponent,
     ],
     providers: [],
     exports: []
 })
-export class NotificationModule {
+export class SharedImageModule {
 }

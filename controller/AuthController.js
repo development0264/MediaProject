@@ -8,24 +8,13 @@ router.use(bodyParser.json());
 
 router.post('/signup', async (req, res) => {
     var response = await User.signup(req, res);
-    if (response.success) {
-        res.status(200).send(response).end();
-    }
-    else {
-        res.status(200).send(response).end();
-    }
+    res.status(200).send(response).end();
 })
 
 router.get('/verify', async (req, res) => {
 
     var response = await User.verify(req, res, req.query.decoded);
-    console.log(response.Location)
-    if (response.success) {
-        res.status(200).send(response).end();
-    }
-    else {
-        res.status(200).send(response).end();
-    }
+    res.status(200).send(response).end();
 })
 
 router.post('/login', async (req, res) => {
@@ -34,12 +23,8 @@ router.post('/login', async (req, res) => {
 
 router.get('/forgotpassword', async (req, res) => {
     var response = await User.forgotpassword(req, res);
-    if (response.success) {
-        res.status(200).send(response).end();
-    }
-    else {
-        res.status(200).send(response).end();
-    }
+    res.status(200).send(response).end();
+
 });
 
 router.get('/resetverification', async (req, res) => {
@@ -57,36 +42,17 @@ router.get('/resetverification', async (req, res) => {
 
 router.post('/request', async (req, res) => {
     var response = await User.request(req, res);
-    if (response.success) {
-        // res.writeHead(301,
-        //     { Location: response.Location }
-        // );
-        // res.end()
-        res.status(200).send(response).end();
-    }
-    else {
-        res.status(200).send(response).end();
-    }
+    res.status(200).send(response).end();
 });
 
 router.post('/confirm', async (req, res) => {
     var response = await User.confirm(req, res);
-    if (response.success) {
-        res.status(200).send(response).end();
-    }
-    else {
-        res.status(200).send(response).end();
-    }
+    res.status(200).send(response).end();
 });
 
 router.get('/check', async (req, res) => {
     var response = await User.checkuser(req, res);
-    if (response.success) {
-        res.status(200).send(response).end();
-    }
-    else {
-        res.status(200).send(response).end();
-    }
+    res.status(200).send(response).end();
 });
 
 module.exports = router

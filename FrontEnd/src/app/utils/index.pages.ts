@@ -8,6 +8,7 @@ export { SignupComponent } from '../modules/login-layout/signup/signup.component
 export { ForgotPasswordComponent } from '../modules/login-layout/forgotpassword/forgotpassword.component';
 export { ResetPasswordComponent } from '../modules/login-layout/resetpassword/resetpassword.component';
 export { DashboardComponent } from '../modules/dashboard/dashboard.component';
+export { SharedComponent } from '../modules/shared/shared.component';
 export { NotificationComponent } from '../modules/notification/notification.component';
 
 // CRUD

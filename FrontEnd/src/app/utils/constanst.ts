@@ -1,4 +1,4 @@
-const HOST = 'http://localhost:3000'
+const HOST = 'http://192.168.0.45:3000'
 
 export const CONSTANST = {
     permissions: {},
@@ -12,6 +12,7 @@ export const CONSTANST = {
         },
         media: {
             list: HOST + '/api/media/list',
+            sharedlist: HOST + '/api/media/sharedlist',
             photo: HOST + '/api/media/photo',
             video: HOST + '/api/media/video',
             photoandvideo: HOST + '/api/media/photoandvideo',

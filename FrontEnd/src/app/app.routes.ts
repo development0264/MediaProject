@@ -18,7 +18,8 @@ import {
     //PersonComponent,
     NotFoundComponent,
     UserComponent,
-    DashboardComponent
+    DashboardComponent,
+    SharedComponent
 } from './utils/index.pages';
 
 // LAYOUTS
@@ -33,6 +34,7 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         children: [
             { path: '', component: DashboardComponent },
+            { path: 'shared', component: SharedComponent },
             { path: 'contact-us', component: ContactUsComponent },
             { path: 'notification', component: NotificationComponent }
         ]

@@ -49,6 +49,68 @@ function userImage() {
         });
     }
 
+    this.sharedlist = async function (req, res) {
+        return sequelize.transaction(function (t) {
+            var objParam = req.query;
+            var Orderby = objParam.active + ' ' + objParam.order;
+            var search = {};
+            search['$and'] = [];
+            if (objParam.iduser != null && objParam.iduser != '' && objParam.iduser != undefined) {
+                var objSearch = {
+                    ['iduser']: {
+                        ['$eq']: objParam.iduser
+                    }
+                }
+                search['$and'].push(objSearch);
+            }
+
+            Usershare.belongsTo(User, {
+                foreignKey: {
+                    name: 'idtouser',
+                    allowNull: false
+                }
+            });
+
+            Usershare.belongsTo(Media, {
+                foreignKey: {
+                    name: 'idmedia',
+                    allowNull: false
+                }
+            });
+
+            return Usershare.findAndCountAll({
+                where: search,
+                order: Orderby,
+                offset: parseInt(objParam.start),
+                limit: parseInt(objParam.length),
+                include: [{
+                    model: User,
+                    required: true,
+                }, {
+                    model: Media,
+                    //required: true,
+                }]
+            }).then(function (response) {
+
+                var response1 = new Object();
+                response1.success = true;
+                response1.draw = objParam.draw;
+                response1.recordsTotal = response.count;
+                response1.recordsFiltered = response.count;
+                response1.data = response.rows;
+                return response1;
+
+            })
+        }).then(function (response) {
+            return response
+        }).catch(function (err) {
+            return ({
+                success: false,
+                message: err.message,
+            });
+        });
+    }
+
     this.SaveMedia = async function (decode, Filename) {
         return sequelize.transaction(function (t) {
             return Media.create({

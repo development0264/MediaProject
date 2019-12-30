@@ -32,12 +32,16 @@ var http = require('http').createServer(app);
 global.io = require('socket.io')(http);
 
 
-http.listen(process.env.APIPort, function () {
-    console.log('listening on *:' + process.env.APIPort);
+console.log(process.env.GatewayPort)
+http.listen(process.env.GatewayPort, function () {
+    console.log('listening on *:' + process.env.GatewayPort);
 });
 
 io.sockets.on('connection', function (socket) {
+    console.log(socket)
     console.log('connection...');
 })
+
+module.exports = app;
 
 // app.listen(3000);

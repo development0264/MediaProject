@@ -53,6 +53,7 @@ router.post('/auth/signup', async (req, res) => {
 
 router.get('/auth/verify', async (req, res) => {
     tokenhandler.verify(req.query.token).then(function (response) {
+        console.log(response)
         api.get(req.path, {
             params: {
                 decoded: response

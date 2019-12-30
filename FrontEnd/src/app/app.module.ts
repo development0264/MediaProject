@@ -35,6 +35,7 @@ import { UserComponent } from './modules/user/user.component';
 import { AdminLayoutModule } from './modules/admin-layout/admin-layout.module';
 import { LoginLayoutModule } from './modules/login-layout/login-layout.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { SharedImageModule } from './modules/shared/shared.module';
 import { NotificationComponent } from './modules/notification/notification.component';
 // import { DashboardComponent } from './modules/dashboard/dashboard.component';
 // import { PersonComponent } from './modules/person/person.component';
@@ -61,7 +62,8 @@ import { NotificationComponent } from './modules/notification/notification.compo
         AdminLayoutModule,
         LoginLayoutModule,
         MatVideoModule,
-        DashboardModule
+        DashboardModule,
+        SharedImageModule
     ],
     providers: [ /*DECLARACIÓN DE SERVICIOS*/
         AuthGuard,

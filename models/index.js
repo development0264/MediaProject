@@ -12,7 +12,10 @@ var sequelize = new Sequelize(process.env.Mysqldatabase, process.env.Mysqluser, 
         min: 0,
         idle: 10000
     },
-    logging: true,
+    logging: console.log,
+    // logging: function (str) {
+    //     console.log(str)
+    // },
     define: {
         timestamps: false,
     }

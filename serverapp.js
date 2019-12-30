@@ -23,6 +23,10 @@ app.use('/auth', require('./controller/AuthController'))
 var http = require('http').createServer(app);
 global.io = require('socket.io')(http);
 
+http.listen(process.env.APIPort, function () {
+    console.log('listening on *:' + process.env.APIPort);
+});
+
 // var socket = require('socket.io-client')('http://localhost:3000');
 
-app.listen(3001);
+//app.listen(3001);

@@ -31,6 +31,27 @@ router.get('/media/list', isAuthorized, (req, res) => {
     })
 })
 
+router.get('/media/sharedlist', isAuthorized, (req, res) => {
+    api.get(req.path, {
+        params: {
+            iduser: req.decoded.id,
+            active: req.query.active,
+            order: req.query.order,
+            search: req.query.search,
+            length: req.query.pageSize,
+            start: req.query.page,
+        }
+    }).then((responseFromServer2) => {
+        if (responseFromServer2.data.success) {
+            res.status(200).send(responseFromServer2.data)
+        } else {
+            res.status(401).send(responseFromServer2.data)
+        }
+    }).catch((err) => {
+        res.send(err)
+    })
+})
+
 router.post('/media/photo', multer.array('files', 5), isAuthorized, (req, res) => {
     let form = new FormData();
     for (var i = 0; i < req.files.length; i++) {

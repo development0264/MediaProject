@@ -6,3 +6,15 @@ mat-sidenav {
     -webkit-box-shadow: 5px 0 5px -5px #333;
     box-shadow: 5px 0 5px -5px #333;
 }
+
+.footer {
+    position: fixed;
+    
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #ff4081;
+    color: white;
+    text-align: center;
+    margin: 0px;
+ }
