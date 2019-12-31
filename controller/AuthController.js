@@ -13,6 +13,7 @@ router.post('/signup', async (req, res) => {
 
 router.get('/verify', async (req, res) => {
 
+    console.log()
     var response = await User.verify(req, res, req.query.decoded);
     res.status(200).send(response).end();
 })

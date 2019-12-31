@@ -11,13 +11,16 @@ var expect = chai.expect;
 describe('API Tests', function () {
 
     var signup = {
-        "name": "enter_name",
-        "email": "enter_email",
-        "password": "enter_password",
-        "confirmpassword": "enter_confirm_password"
+        "name": process.env.unit_test_name,
+        "email": process.env.unit_test_email,
+        "password": process.env.unit_test_password,
+        "confirmpassword": process.env.unit_test_confirmpassword
     };
 
+    console.log(signup)
+
     var token;
+    var Authorizationtoken;
 
     describe('## signup ', function () {
         it('should do signup', function (done) {
@@ -41,6 +44,30 @@ describe('API Tests', function () {
                 .end(function (err, res) {
                     if (err) {
                         return done(err);
+                    }
+                    done();
+                });
+        });
+    });
+
+    var login = {
+        "email": process.env.unit_test_email,
+        "password": process.env.unit_test_password,
+    }
+
+    describe('## login ', function () {
+        it('should do login after Signup', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .expect(200)
+                .send(login)
+                .end(function (err, res) {
+                    expect(res.statusCode).to.equal(200);
+                    expect(res.body).to.have.property('token');
+                    if (err) {
+                        return done(err);
+                    } else {
+                        Authorizationtoken = res.body.token
                     }
                     done();
                 });
