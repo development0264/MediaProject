@@ -4,3 +4,10 @@
     width: 80vw;
     margin:5vh auto 9vh auto!important;
 }
+
+.mat-table-empty {
+    overflow: auto;
+    height: 75vh;
+    width: 80vw;
+    margin:5vh auto 9vh auto!important;
+}

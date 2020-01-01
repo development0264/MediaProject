@@ -46,7 +46,6 @@ import { NotificationComponent } from './modules/notification/notification.compo
     declarations: [ /*DECLARACIÓN DE COMPONENTES*/
         AppComponent,
         NotificationComponent,
-        ContactUsComponent,
         NotFoundComponent,
         UserComponent,
         ConfirmComponent,

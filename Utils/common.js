@@ -51,7 +51,7 @@ function encryptioncompareSync(password, userpassword) {
     return bcrypt.compareSync(password, userpassword)
 }
 
-function GetUserNameFromDate() {
+function GetMediaNameFromDate() {
     var d = new Date();
     var curr_date = d.getDate();
     var curr_month = d.getMonth() + 1; //Months are zero based
@@ -71,6 +71,6 @@ module.exports = {
     customPassword: customPassword,
     encryption: encryption,
     encryptioncompareSync: encryptioncompareSync,
-    GetUserNameFromDate: GetUserNameFromDate,
+    GetMediaNameFromDate: GetMediaNameFromDate,
     //CheckValidToken: CheckValidToken
 }

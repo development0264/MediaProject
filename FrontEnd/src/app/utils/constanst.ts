@@ -1,4 +1,4 @@
-const HOST = 'http://192.168.0.45:3000'
+const HOST = 'http://localhost:3000'
 
 export const CONSTANST = {
     permissions: {},
@@ -20,7 +20,10 @@ export const CONSTANST = {
             notificationcount: HOST + '/api/media/notificationcount',
             notificationupdate: HOST + '/api/media/notificationupdate',
         },
-        user: {}
+        generic: {
+            terms: HOST + '/api/terms',
+            contactus: HOST + '/api/contactus',
+        }
     },
     lang: {},
     session: {},

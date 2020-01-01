@@ -22,7 +22,7 @@ function imagevideohandler() {
                 form.uploadDir = __dirname + "/../" + process.env.MediaFolderName;
 
                 var ext = file.name.substring(file.name.indexOf('.'), file.name.length);
-                var NewName = Commonfunction.GetUserNameFromDate();
+                var NewName = Commonfunction.GetMediaNameFromDate();
                 if (ext.indexOf('?') > -1) {
                     ext = ext.substring(0, ext.indexOf('?'));
                 };

@@ -150,6 +150,28 @@ export class MediaService {
                 return of(err.error.message);
             }));
     }
+
+
+    contactus(data) {
+
+        var shareheaders = new HttpHeaders({
+            'Authorization': localStorage.getItem('token'),
+            'Content-Type': 'application/json'
+        });
+
+        console.log(data)
+        return this.http.post(CONSTANST.routes.generic.contactus, data, { headers: shareheaders })
+            .pipe(
+                catchError((err: any) => {
+                    if (err instanceof HttpErrorResponse) {
+                        this.snack.open(err.error.message, 'Close',
+                            {
+                                duration: 3500, verticalPosition: 'top', panelClass: 'snack-error'
+                            });
+                    }
+                    return of(err.error.message);
+                }));
+    }
 }
 
 export interface MediaApi {

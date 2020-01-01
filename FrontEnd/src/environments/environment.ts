@@ -5,6 +5,6 @@
 
 export const environment = {
   production: false,
-  imageendpoint: 'http://192.168.0.45:3000/MediaUploads'
+  imageendpoint: 'http://localhost:3000/MediaUploads'
 
 };

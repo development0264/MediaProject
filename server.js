@@ -38,7 +38,6 @@ http.listen(process.env.GatewayPort, function () {
 });
 
 io.sockets.on('connection', function (socket) {
-    console.log(socket)
     console.log('connection...');
 })
 

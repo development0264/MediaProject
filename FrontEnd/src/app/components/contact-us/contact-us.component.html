@@ -1,5 +1,56 @@
-<div class="container animated fadeIn">
-    <p>
-        contact-us works!
-    </p>
+<div class="animated fadeIn table-container mat-elevation-z20">
+    <mat-card class="example-card">
+        <mat-card-header>
+            <mat-card-title>Contact us</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <div class="table-header">
+                <form [formGroup]="form" (ngSubmit)='onSubmit()'>
+
+                    <mat-form-field class="full-width-input">
+                        <input matInput placeholder="Email" formControlName="email" required>
+                        <mat-error *ngIf="isFieldInvalid('email')">
+                            Please inform your email
+                        </mat-error>
+                        <mat-error *ngIf="isFieldInvalid('email')">
+                            Email must be a valid email address
+                        </mat-error>
+                    </mat-form-field>
+
+                    <br />
+
+                    <mat-form-field class="full-width-input">
+                        <input matInput placeholder="title" formControlName="title" required>
+                        <mat-error *ngIf="isFieldInvalid('title')">
+                            Please enter title
+                        </mat-error>
+                    </mat-form-field>
+
+                    <br />
+
+                    <mat-form-field class="full-width-input">
+                        <input matInput placeholder="message" formControlName="message" required>
+                        <mat-error *ngIf="isFieldInvalid('message')">
+                            Please enter Message
+                        </mat-error>
+                    </mat-form-field>
+
+                    <br />
+
+
+                    <div mat-dialog-actions align="end">
+                        <button mat-button (click)="form.reset()">Cancel</button>
+                        <button mat-raised-button color="primary" type="submit" class="btnSave"
+                            [disabled]="!form.valid">
+                            <mat-icon aria-label="icon-button">send</mat-icon>
+                            <span>Send</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </mat-card-content>
+
+    </mat-card>
 </div>

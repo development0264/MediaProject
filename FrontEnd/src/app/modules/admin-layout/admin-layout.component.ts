@@ -11,6 +11,7 @@ import { MediaMatcher } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { AdminlayoutService } from './admin-layout.service';
+import { CONSTANST } from '../../utils/constanst';
 
 
 // LOGOUT CONFIRM DIALOG
@@ -33,7 +34,8 @@ export class AdminLayoutComponent implements OnInit {
     isLoggedIn$: Observable<boolean>;
     mobileQuery: MediaQueryList;
     private _mobileQueryListener: () => void;
-    private url = 'http://192.168.0.45:3000';
+    private url = 'http://localhost:3000';
+    terms = CONSTANST.routes.generic.terms;
     private socket;
     notificationcount = 0
 

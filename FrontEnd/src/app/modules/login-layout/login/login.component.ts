@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 
 // SERVICES
 import { AuthService } from './../../../services/auth.service';
@@ -20,13 +21,16 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class LoginComponent implements OnInit {
     form: FormGroup;
     private formSubmitAttempt: boolean;
+    httpheaders: HttpHeaders
 
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private router: Router,
         public snack: MatSnackBar,
-        private location: PlatformLocation
+        private location: PlatformLocation,
+        public http: HttpClient,
+        //public httpheaders: HttpHeaders,
     ) {
     }
 
@@ -54,6 +58,7 @@ export class LoginComponent implements OnInit {
             this.authService.login(this.form.value).subscribe((data: any) => {
                 if (data.success) {
                     this.authService.loggedIn.next(true); /*SETEA EL METODO loggedIn COMO TRUE EN EL AuthService*/
+                    this.httpheaders.append("Authorization", data.token)
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('iduser', data.data.id);
                     localStorage.setItem('email', data.data.email); /*SETEA EL TOKEN PROCEDENTE DEL BACKEND*/
