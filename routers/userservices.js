@@ -6,37 +6,38 @@ var tokenhandler = require('../Utils/tokenhandler');
 var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
 var validator = require('validator');
 var config = require('../config.js')
+var User = require('../data_accesss/user');
 
 const BASE_URL = process.env.BASE_URL
 const api = apiAdapter(BASE_URL)
 
 router.post('/auth/signup', async (req, res) => {
     if (!req.body.name) {
-        res.status(409).send({ success: false, message: "name not provided" })
+        res.status(400).send({ success: false, message: "name not provided" })
     } else if (!validator.isLength(req.body.name, { min: 6, max: undefined })) {
-        res.status(409).send({ success: false, message: "name is shorter than minimum length" })
+        res.status(400).send({ success: false, message: "name is shorter than minimum length" })
     } else if (!validator.isLength(req.body.name, { min: undefined, max: 20 })) {
-        res.status(409).send({ success: false, message: "name is shorter than maximum length" })
+        res.status(400).send({ success: false, message: "name is longer than maximum length" })
     } else if (!req.body.email) {
-        res.status(409).send({ success: false, message: "email not provided" })
+        res.status(400).send({ success: false, message: "email not provided" })
     } else if (!validator.isEmail(req.body.email)) {
-        res.status(409).send({ success: false, message: "email is	invalid,	wrong	format" })
+        res.status(400).send({ success: false, message: "email is invalid, wrong format" })
     } else if (!validator.isLength(req.body.email, { min: 6, max: undefined })) {
-        res.status(409).send({ success: false, message: "email is	shorted	than minimum length" })
+        res.status(400).send({ success: false, message: "email is shorted than minimum length" })
     } else if (!validator.isLength(req.body.email, { min: undefined, max: 50 })) {
-        res.status(409).send({ success: false, message: "email is longer than maximum length" })
+        res.status(400).send({ success: false, message: "email is longer than maximum length" })
     } else if (!req.body.password) {
-        res.status(409).send({ success: false, message: "password not provided" })
+        res.status(400).send({ success: false, message: "password not provided" })
     } else if (!validator.isLength(req.body.password, { min: 8, max: undefined })) {
-        res.status(409).send({ success: false, message: "password is shorter than minimum length" })
+        res.status(400).send({ success: false, message: "password is shorter than minimum length" })
     } else if (!validator.isLength(req.body.password, { min: undefined, max: 20 })) {
-        res.status(409).send({ success: false, message: "password is longer than minimum length" })
+        res.status(400).send({ success: false, message: "password is longer than maximum length" })
     } else if (!strongRegex.test(req.body.password)) {
-        res.status(409).send({ success: false, message: "password invalid criteria" })
+        res.status(400).send({ success: false, message: "password invalid criteria" })
     } else if (!req.body.confirmpassword) {
-        res.status(409).send({ success: false, message: "confirmpassword not provided" })
+        res.status(400).send({ success: false, message: "confirmpassword not provided" })
     } else if (req.body.confirmpassword != req.body.password) {
-        res.status(409).send({ success: false, message: "confirmpassword did not match password" })
+        res.status(400).send({ success: false, message: "confirmpassword did not match password" })
     } else {
         api.post(req.path, req.body, {
         }).then((responseFromServer2) => {
@@ -53,7 +54,6 @@ router.post('/auth/signup', async (req, res) => {
 
 router.get('/auth/verify', async (req, res) => {
     tokenhandler.verify(req.query.token).then(function (response) {
-        console.log(response)
         api.get(req.path, {
             params: {
                 decoded: response
@@ -67,24 +67,37 @@ router.get('/auth/verify', async (req, res) => {
             } else {
                 res.status(422).send(responseFromServer2.data)
             }
-        }).catch((err) => {
-            res.send(err)
         })
-    }).catch((error) => res.send(error));
+    }).catch((error) => res.status(409).send(error));
 })
 
 router.post('/auth/login', async (req, res) => {
     try {
-        api.post(req.path, req.body, {
-        }).then((responseFromServer2) => {
-            if (responseFromServer2.data.success) {
-                res.status(200).send(responseFromServer2.data)
-            } else {
-                res.status(422).send(responseFromServer2.data)
-            }
-        }).catch((err) => {
-            res.status(417).send(err)
-        })
+        if (!validator.isEmail(req.body.email)) {
+            res.status(400).send({ success: false, message: "email is invalid, wrong format" })
+        } else if (!validator.isLength(req.body.email, { min: 6, max: undefined })) {
+            res.status(400).send({ success: false, message: "email is shorted than minimum length" })
+        } else if (!validator.isLength(req.body.email, { min: undefined, max: 50 })) {
+            res.status(400).send({ success: false, message: "email is longer than maximum length" })
+        } else if (!req.body.password) {
+            res.status(400).send({ success: false, message: "password not provided" })
+        } else if (!validator.isLength(req.body.password, { min: 8, max: undefined })) {
+            res.status(400).send({ success: false, message: "password is shorter than minimum length" })
+        } else if (!strongRegex.test(req.body.password)) {
+            res.status(400).send({ success: false, message: "password invalid criteria" })
+        }
+        else {
+            api.post(req.path, req.body, {
+            }).then((responseFromServer2) => {
+                if (responseFromServer2.data.success) {
+                    res.status(200).send(responseFromServer2.data)
+                } else {
+                    res.status(422).send(responseFromServer2.data)
+                }
+            }).catch((err) => {
+                res.status(417).send(err)
+            })
+        }
     } catch (err) {
         res.status(500).end();
     }
@@ -173,5 +186,17 @@ router.post('/auth/confirm', async (req, res) => {
     }
 
 });
+
+
+
+router.post('/auth/checkuserexist', async (req, res) => {
+    var response = await User.checkuserexist(req, res);
+    console.log("response", response)
+    if (response.success) {
+        res.status(200).send(response)
+    } else {
+        res.status(200).send(response)
+    }
+})
 
 module.exports = router

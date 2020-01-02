@@ -28,7 +28,6 @@ const limiterFastBruteByIP = new RateLimiterRedis({
 });
 
 async function loginRoute(req, res) {
-    console.log(req.body)
 
     //return new Promise(function (resolve, reject) {
     const ipAddr = req.connection.remoteAddress;
@@ -57,7 +56,6 @@ async function loginRoute(req, res) {
                 }, {
                     name: req.body.email,
                 }],
-                isaccountverify: true
             }
         }).then(function (response) {
             if (response == null) {
@@ -76,40 +74,45 @@ async function loginRoute(req, res) {
                 }
             }
             else {
-                var passwordIsValid = bcrypt.compareSync(req.body.password, response.password)//commonfunction.encryptioncompareSync(req.body.password, response.password)                             
-                if (passwordIsValid) {
-                    var user = {
-                        id: response.id,
-                        name: response.name,
-                        email: response.email,
-                        password: Encryptpassword,
-                    }
-                    var token = tokenhandler.sign(user, config.AuthorizationexpiresIn)
+                if (response.isaccountverify == true) {
+                    var passwordIsValid = bcrypt.compareSync(req.body.password, response.password)//commonfunction.encryptioncompareSync(req.body.password, response.password)                             
+                    if (passwordIsValid) {
+                        var user = {
+                            id: response.id,
+                            name: response.name,
+                            email: response.email,
+                            password: Encryptpassword,
+                        }
+                        var token = tokenhandler.sign(user, config.AuthorizationexpiresIn)
 
-                    CheckInviteUser(req.body.email, response.id).then(function () {
+                        CheckInviteUser(req.body.email, response.id).then(function () {
 
-                        res.status(200).send({
-                            success: true,
-                            token: token,
-                            data: response,
-                            message: "Login Successfully..."
+                            res.status(200).send({
+                                success: true,
+                                token: token,
+                                data: response,
+                                message: "Login Successfully..."
+                            })
                         })
-                    })
 
-                } else {
-                    try {
-                        Promise.all([
-                            limiterFastBruteByIP.consume(ipAddr)
-                        ]);
-                        res.status(200).send({ success: false, message: 'password is wrong' });
-                    } catch (rlRejected) {
-                        if (rlRejected instanceof Error) {
-                            throw rlRejected;
-                        } else {
-                            res.set('Retry-After', parseInt(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
-                            res.status(200).send({ success: false, message: "multiple attempts to login Retry-After : " + String(Math.round(rlRejected.msBeforeNext / 1000)) || 1 + " minutes" });
+                    } else {
+                        try {
+                            Promise.all([
+                                limiterFastBruteByIP.consume(ipAddr)
+                            ]);
+                            res.status(200).send({ success: false, message: 'password is wrong' });
+                        } catch (rlRejected) {
+                            if (rlRejected instanceof Error) {
+                                throw rlRejected;
+                            } else {
+                                res.set('Retry-After', parseInt(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
+                                res.status(200).send({ success: false, message: "multiple attempts to login Retry-After : " + String(Math.round(rlRejected.msBeforeNext / 1000)) || 1 + " minutes" });
+                            }
                         }
                     }
+                }
+                else {
+                    res.status(200).send({ success: false, message: 'email is not verify' });
                 }
             }
         });
@@ -500,6 +503,27 @@ function userTransaction() {
             return {
                 success: false,
                 message: err.message,
+            };
+        });
+    }
+
+    this.checkuserexist = async function (req, res) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({ where: { email: req.body.email } }).then(function (UserExist) {
+                if (UserExist != null) {
+                    resolve({ success: true, data: null })
+                }
+                else {
+                    resolve({ success: false, data: UserExist })
+                }
+            })
+        }).then(function (response) {
+            return response
+        }).catch(function (err) {
+            return {
+                success: false,
+                message: err.message,
+                data: null
             };
         });
     }
