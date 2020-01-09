@@ -112,6 +112,7 @@ function userImage() {
     }
 
     this.SaveMedia = async function (decode, Filename) {
+        console.log(Filename.Type)
         return sequelize.transaction(function (t) {
             return Media.create({
                 iduser: decode.id,
@@ -120,6 +121,29 @@ function userImage() {
                 createddate: new Date(),
                 Type: Filename.Type
             }).then(function (create) {
+                if (create) {
+                    return { success: true, message: "Image Uploaded Successfully...", data: create }
+                } else {
+                    return { success: false, message: "Image Uploadeding Fail..." };
+                };
+            })
+        }).then(function (response) {
+            return (response)
+        }).catch(function (err) {
+            return ({
+                success: false,
+                message: err.message,
+            });
+        });
+    }
+
+    this.UploadPoster = async function (Filename, id_media) {
+        return sequelize.transaction(function (t) {
+            return Media.update({
+                poster: Filename.Name,
+                Type: "Both",
+                ispair: (Filename.ispair == true || Filename.ispair == 'true') ? 1 : 0
+            }, { where: { id: id_media } }).then(function (create) {
                 if (create) {
                     return { success: true, message: "Image Uploaded Successfully...", data: create }
                 } else {

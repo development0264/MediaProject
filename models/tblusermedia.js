@@ -27,6 +27,14 @@ module.exports = function (sequelize, DataTypes) {
     Type: {
       type: DataTypes.STRING(45),
       allowNull: true
+    },
+    poster: {
+      type: DataTypes.STRING(200),
+      allowNull: true
+    },
+    ispair: {
+      type: DataTypes.INTEGER(1),
+      allowNull: true
     }
   }, {
     tableName: 'tblusermedia'

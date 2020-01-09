@@ -27,7 +27,7 @@ router.post('/video', isAuthorized, async (req, res) => {
 });
 
 router.post('/photoandvideo', isAuthorized, async (req, res) => {
-    var response = await imagevideohandler.imagevideoupload(req, res)
+    var response = await imagevideohandler.mediapair(req, res)
     res.status(200).send(response).end();
 });
 

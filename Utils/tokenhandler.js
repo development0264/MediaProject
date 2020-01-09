@@ -35,7 +35,6 @@ function tokenhandler() {
     this.tokenverify = async function (token, args) {
         return new Promise(function (resolve, reject) {
             jwt.verify(token, config.forgotsecret, (err, decoded) => {
-                console.log(decoded)
                 if (err) {
                     reject({ success: false, message: "Token is invalid or expired" })
                 } else {
