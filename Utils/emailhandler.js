@@ -30,18 +30,18 @@ function emailhandler() {
             };
             transporter.sendMail(mail, function (error, response) {
                 if (error) {
-                    resolve(false);
+                    reject({ success: false, err: error, response: null });
                 } else {
-                    resolve(true);
+                    resolve({ success: true, err: null, response: response });
                 }
             });
         }).then(function (resUpdate) {
             return resUpdate;
         }).catch(function (err) {
             //console.error('[' + moment().format('DD/MM/YYYY hh:mm:ss a') + '] ' + err.stack || err.message);
-            return false;
+            return err;
         });
+
     }
 }
-
 module.exports = new emailhandler(); 

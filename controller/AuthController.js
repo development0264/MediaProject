@@ -11,8 +11,15 @@ router.post('/signup', async (req, res) => {
     res.status(200).send(response).end();
 })
 
+router.post('/resend', async (req, res) => {
+    var response = await User.resend(req, res);
+    console.log(response)
+    res.status(200).send(response).end();
+})
+
 router.get('/verify', async (req, res) => {
     var response = await User.verify(req, res, req.query.decoded);
+
     res.status(200).send(response).end();
 })
 

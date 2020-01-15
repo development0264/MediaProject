@@ -18,8 +18,9 @@ describe('Auth API Tests', function () {
         "confirmpassword": process.env.unit_test_confirmpassword
     };
 
+    console.log("signup", signup)
+
     var token;
-    const Authorizationtoken;
 
     describe('## signup ', () => {
         it('should return 409 if name is not provided', function (done) {
@@ -28,7 +29,7 @@ describe('Auth API Tests', function () {
                 .send({ "email": process.env.unit_test_email, "password": process.env.unit_test_password, "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 })
         });
 
@@ -38,7 +39,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": "a", "email": process.env.unit_test_email, "password": process.env.unit_test_password, "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done().end();
+                    done();
                 });
         });
 
@@ -48,7 +49,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": Array(257).join('a'), "email": process.env.unit_test_email, "password": process.env.unit_test_password, "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -58,7 +59,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "password": process.env.unit_test_password, "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -68,7 +69,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": "a@a.", "password": process.env.unit_test_password, "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -78,7 +79,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": Array(50).join('a') + "@a.com", "password": process.env.unit_test_password, "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -88,7 +89,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": process.env.unit_test_email, "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -98,7 +99,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": process.env.unit_test_email, "password": "1234567", "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    // /done();
+                    done();
                 });
         });
 
@@ -108,7 +109,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": process.env.unit_test_email, "password": Array(257).join('a'), "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -118,7 +119,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": process.env.unit_test_email, "password": "12345678", "confirmpassword": process.env.unit_test_confirmpassword })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -128,7 +129,7 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": process.env.unit_test_email, "password": process.env.unit_test_password })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -138,12 +139,15 @@ describe('Auth API Tests', function () {
                 .send({ "name": process.env.unit_test_name, "email": process.env.unit_test_email, "password": process.env.unit_test_password, "confirmpassword": '87654321' })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
-        it('should return 200 after adding new user and 400 after re adding same user', function (done) {
 
+
+        it('should return 200 after adding new user and 409 after re adding same user', function (done) {
+
+            console.log("fghdfgkjhdfkjgbdfkjbghkjdfgkjdfbgkj", signup)
             request(app)
                 .post('/api/auth/checkuserexist')
                 .send(signup)
@@ -157,6 +161,7 @@ describe('Auth API Tests', function () {
                 .post('/api/auth/signup')
                 .send(signup)
                 .end(function (err, res) {
+                    console.log(res.statusCode)
                     expect(res.statusCode).to.equal(200);
                     expect(res.body).to.have.property('token');
                     token = res.body.token;
@@ -183,6 +188,7 @@ describe('Auth API Tests', function () {
                 .get('/api/auth/verify?token=' + InvalidToken)
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(409);
+                    done();
                 });
         });
 
@@ -191,6 +197,7 @@ describe('Auth API Tests', function () {
                 .get('/api/auth/verify?token=' + token)
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(301);
+                    done();
                 });
         });
 
@@ -212,7 +219,7 @@ describe('Auth API Tests', function () {
                 .send({ "password": process.env.unit_test_password })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -222,7 +229,7 @@ describe('Auth API Tests', function () {
                 .send({ "email": "a@a.", "password": process.env.unit_test_password })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -232,7 +239,7 @@ describe('Auth API Tests', function () {
                 .send({ "email": Array(50).join('a') + "@a.com", "password": process.env.unit_test_password })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -242,7 +249,7 @@ describe('Auth API Tests', function () {
                 .send({ "email": process.env.unit_test_email })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -251,8 +258,9 @@ describe('Auth API Tests', function () {
                 .post('/api/auth/login')
                 .send({ "email": process.env.unit_test_email, "password": "1234567" })
                 .end(function (err, res) {
+                    console.log(res.statusCode)
                     expect(res.statusCode).to.equal(400);
-                    // /done();
+                    done();
                 });
         });
 
@@ -262,7 +270,7 @@ describe('Auth API Tests', function () {
                 .send({ "email": process.env.unit_test_email, "password": "12345678" })
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(400);
-                    //done();
+                    done();
                 });
         });
 
@@ -277,9 +285,11 @@ describe('Auth API Tests', function () {
                 .send(loginInvalid)
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(422);
+                    done();
                 });
         });
 
+        var Authorizationtoken = null;
         var login = {
             "email": process.env.unit_test_email,
             "password": process.env.unit_test_password,
@@ -293,10 +303,10 @@ describe('Auth API Tests', function () {
                 .send(login)
                 .end(function (err, res) {
                     expect(res.statusCode).to.equal(200);
-                    expect(res.body).to.have.property('token');
                     if (err) {
                         return done(err);
                     } else {
+                        expect(res.body).to.have.property('token');
                         Authorizationtoken = res.body.token
                     }
                     done();

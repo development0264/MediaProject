@@ -182,7 +182,6 @@ function CheckInviteUser(email, UserId) {
 function userTransaction() {
 
     this.signup = async function (req, res) {
-        //sequelize.transaction(function (t) {
         return new Promise(function (resolve, reject) {
             return User.findOne({
                 where: {
@@ -190,7 +189,7 @@ function userTransaction() {
                 }
             }).then(function (chkUserExist) {
                 if (chkUserExist != null) {
-                    resolve({ auth: false, message: "email is already exist..." })
+                    reject({ success: false, message: "email is already exist...", statuscode: 409 })
                 } else {
                     var hashedPassword = bcrypt.hashSync(req.body.password, 8)//commonfunction.encryption(req.body.password)                
                     var objUserReg = req.body
@@ -198,7 +197,7 @@ function userTransaction() {
                     objUserReg.createddate = new Date()
                     User.create(objUserReg).then(function (UserReg) {
                         if (UserReg != null) {
-                            var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email, password: hashedPassword }, config.SignupexpiresIn)
+                            var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email }, config.SignupexpiresIn)
                             var EmailLink = process.env.APIURl + "api/auth/verify?token=" + token
                             var body = '<h1><b>Thank You</b></h1><br>' +
                                 'Thanks for registering. Please follow the link below to complete your registration.<br>' + EmailLink;
@@ -207,15 +206,25 @@ function userTransaction() {
                                 subject: "Thanks for Registering",
                                 body: body,
                             }
-                            return emailhandler.sendemail(obj).then(function () {
-                                resolve({
-                                    success: true,
-                                    message: 'Your account have been successfully created. In order to activate it, please check your mailbox for more details.',
-                                    token: token
-                                });
+                            return emailhandler.sendemail(obj).then(function (response) {
+                                if (response.success) {
+                                    resolve({
+                                        success: true,
+                                        message: 'Your account have been successfully created. In order to activate it, please check your mailbox for more details.',
+                                        token: token
+                                    });
+                                }
+                                else {
+                                    reject({
+                                        success: false,
+                                        message: response.err,
+                                        token: null,
+                                        statuscode: 535
+                                    });
+                                }
                             })
                         } else {
-                            resolve({ success: false, message: "Registration failed" })
+                            reject({ success: false, message: "Registration failed", statuscode: 535 })
                         }
                     })
                 }
@@ -226,6 +235,56 @@ function userTransaction() {
             return {
                 success: false,
                 message: err.message,
+                statuscode: err.statuscode
+            };
+        });
+    }
+
+    this.resend = async function (req, res) {
+        return new Promise(function (resolve, reject) {
+            return User.findOne({
+                where: {
+                    email: req.body.email
+                }
+            }).then(function (UserReg) {
+                if (UserReg == null) {
+                    reject({ success: false, message: "email is not registered...", statuscode: 200 })
+                } else {
+                    var token = tokenhandler.sign({ id: UserReg.id, name: UserReg.name, email: UserReg.email }, config.SignupexpiresIn)
+                    var EmailLink = process.env.APIURl + "api/auth/verify?token=" + token
+                    var body = '<h1><b>Thank You</b></h1><br>' +
+                        'Thanks for registering. Please follow the link below to complete your registration.<br>' + EmailLink;
+                    var obj = {
+                        email: UserReg.email,
+                        subject: "Thanks for Registering",
+                        body: body,
+                    }
+                    return emailhandler.sendemail(obj).then(function (response) {
+                        if (response.success) {
+                            resolve({
+                                success: true,
+                                message: 'Your account have been successfully created. In order to activate it, please check your mailbox for more details.',
+                                token: token
+                            });
+                        }
+                        else {
+                            reject({
+                                success: false,
+                                message: response.err,
+                                token: null,
+                                statuscode: 535
+                            });
+                        }
+                    })
+                }
+            })
+        }).then(function (response) {
+            return response;
+        }).catch(function (err) {
+            return {
+                success: false,
+                message: err.message,
+                statuscode: err.statuscode
             };
         });
     }
@@ -292,12 +351,22 @@ function userTransaction() {
                         body: body,
                     }
 
-                    return emailhandler.sendemail(obj).then(function () {
-                        resolve({
-                            success: true,
-                            message: 'email is sent on your register mail address.',
-                            token: token
-                        });
+                    return emailhandler.sendemail(obj).then(function (responsemail) {
+                        if (responsemail.success) {
+                            resolve({
+                                success: true,
+                                message: 'email is sent on your register mail address.',
+                                token: token
+                            });
+                        }
+                        else {
+                            reject({
+                                success: false,
+                                message: responsemail.err,
+                                token: null,
+                                statuscode: 535
+                            });
+                        }
                     })
                 }
             });
@@ -473,26 +542,36 @@ function userTransaction() {
                             subject: "Invitation Mail",
                             body: body,
                         }
-                        return emailhandler.sendemail(obj).then(function () {
+                        return emailhandler.sendemail(obj).then(function (responsemail) {
 
-                            var objShare = new Object();
-                            objShare.iduser = req.query.iduser;
-                            objShare.idmedia = req.query.idmedia;
-                            objShare.createdate = new Date();
-                            objShare.createdby = req.query.email;
-                            objShare.idinvited = InviteResponse[0].id
+                            if (responsemail.success) {
+                                var objShare = new Object();
+                                objShare.iduser = req.query.iduser;
+                                objShare.idmedia = req.query.idmedia;
+                                objShare.createdate = new Date();
+                                objShare.createdby = req.query.email;
+                                objShare.idinvited = InviteResponse[0].id
 
-                            Share.findOrCreate({
-                                where:
-                                {
-                                    iduser: req.query.iduser,
-                                    idmedia: req.query.idmedia,
-                                    idinvited: InviteResponse[0].id
-                                },
-                                defaults: objShare
-                            }).then(function (ShareResponse) {
-                                resolve({ success: true, message: "File Share successfully" })
-                            })
+                                Share.findOrCreate({
+                                    where:
+                                    {
+                                        iduser: req.query.iduser,
+                                        idmedia: req.query.idmedia,
+                                        idinvited: InviteResponse[0].id
+                                    },
+                                    defaults: objShare
+                                }).then(function (ShareResponse) {
+                                    resolve({ success: true, message: "File Share successfully" })
+                                })
+                            }
+                            else {
+                                reject({
+                                    success: false,
+                                    message: responsemail.err,
+                                    token: null,
+                                    statuscode: 535
+                                });
+                            }
                         })
                     })
                 }

@@ -44,7 +44,31 @@ router.post('/auth/signup', async (req, res) => {
             if (responseFromServer2.data.success) {
                 res.status(200).send(responseFromServer2.data)
             } else {
-                res.status(409).send(responseFromServer2.data)
+                res.status(responseFromServer2.data.statuscode).send(responseFromServer2.data)
+            }
+        }).catch((err) => {
+            res.status(417).send(err)
+        })
+    }
+})
+
+router.post('/auth/resend', async (req, res) => {
+    if (!req.body.email) {
+        res.status(400).send({ success: false, message: "email not provided" })
+    } else if (!validator.isEmail(req.body.email)) {
+        res.status(400).send({ success: false, message: "email is invalid, wrong format" })
+    } else if (!validator.isLength(req.body.email, { min: 6, max: undefined })) {
+        res.status(400).send({ success: false, message: "email is shorted than minimum length" })
+    } else if (!validator.isLength(req.body.email, { min: undefined, max: 50 })) {
+        res.status(400).send({ success: false, message: "email is longer than maximum length" })
+    } else {
+        api.post(req.path, req.body, {
+        }).then((responseFromServer2) => {
+            console.log(responseFromServer2.data.statuscode)
+            if (responseFromServer2.data.success) {
+                res.status(200).send(responseFromServer2.data)
+            } else {
+                res.status(responseFromServer2.data.statuscode).send(responseFromServer2.data)
             }
         }).catch((err) => {
             res.status(417).send(err)
@@ -73,7 +97,10 @@ router.get('/auth/verify', async (req, res) => {
 
 router.post('/auth/login', async (req, res) => {
     try {
-        if (!validator.isEmail(req.body.email)) {
+        if (!req.body.email) {
+            res.status(400).send({ success: false, message: "email not provided" })
+        }
+        else if (!validator.isEmail(req.body.email)) {
             res.status(400).send({ success: false, message: "email is invalid, wrong format" })
         } else if (!validator.isLength(req.body.email, { min: 6, max: undefined })) {
             res.status(400).send({ success: false, message: "email is shorted than minimum length" })
@@ -187,11 +214,8 @@ router.post('/auth/confirm', async (req, res) => {
 
 });
 
-
-
 router.post('/auth/checkuserexist', async (req, res) => {
     var response = await User.checkuserexist(req, res);
-    console.log("response", response)
     if (response.success) {
         res.status(200).send(response)
     } else {

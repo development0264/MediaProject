@@ -5,4 +5,5 @@ export interface User {
     password: string;
     confirmpassword: string;
     token: string;
+    emailresend: string;
 }

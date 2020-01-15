@@ -58,7 +58,6 @@ export class LoginComponent implements OnInit {
             this.authService.login(this.form.value).subscribe((data: any) => {
                 if (data.success) {
                     this.authService.loggedIn.next(true); /*SETEA EL METODO loggedIn COMO TRUE EN EL AuthService*/
-                    //this.httpheaders.append("Authorization", data.token)
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('iduser', data.data.id);
                     localStorage.setItem('email', data.data.email); /*SETEA EL TOKEN PROCEDENTE DEL BACKEND*/

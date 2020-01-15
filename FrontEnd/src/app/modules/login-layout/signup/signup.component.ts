@@ -31,6 +31,7 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
 
 export class SignupComponent implements OnInit {
     form: FormGroup;
+    formresend: FormGroup;
     private formSubmitAttempt: boolean;
     matcher = new MyErrorStateMatcher();
 
@@ -48,6 +49,10 @@ export class SignupComponent implements OnInit {
             confirmpassword: ['']
         }, {
             validator: this.checkPasswords
+        });
+
+        this.formresend = this.fb.group({
+            emailresend: ['', [Validators.required, Validators.email]],
         });
     }
 
@@ -76,26 +81,53 @@ export class SignupComponent implements OnInit {
         );
     }
 
+    isResebdFieldInvalid(field: string) {
+        return (
+            (!this.formresend.get(field).valid && this.formresend.get(field).touched) ||
+            (this.formresend.get(field).untouched && this.formSubmitAttempt)
+        );
+    }
+
     onSubmit() {
         if (this.form.valid) {
             this.authService.signup(this.form.value).subscribe((data: any) => {
-                console.log(data)
                 if (data.success) {
-                    //this.router.navigate(['/login']); /*REDIRECCIONA AL DASHBOAR*/
                     this.snack.open(data.message, 'Close',
                         {
                             duration: 3500, verticalPosition: 'top'
                         });
                 } else { /*SINO MUESTRA UN MENSAJE DE ERROR PROCEDENTE DEL BACKEND*/
-                    // this.snack.openFromComponent(SnackbarComponent, {
-                    //     data: { data: data },
-                    //     duration: 3000
-                    // });
+                    this.snack.open(data.message, 'Close',
+                        {
+                            duration: 3500, verticalPosition: 'top'
+                        });
                 }
             })
         }
         this.formSubmitAttempt = true;
     }
+
+
+    onResendSubmit() {
+        if (this.formresend.valid) {
+            console.log(this.formresend.value)
+            this.authService.resend(this.formresend.value).subscribe((data: any) => {
+                if (data.success) {
+                    this.snack.open(data.message, 'Close',
+                        {
+                            duration: 3500, verticalPosition: 'top'
+                        });
+                } else { /*SINO MUESTRA UN MENSAJE DE ERROR PROCEDENTE DEL BACKEND*/
+                    this.snack.open(data.message, 'Close',
+                        {
+                            duration: 3500, verticalPosition: 'top'
+                        });
+                }
+            })
+        }
+        this.formSubmitAttempt = true;
+    }
+
 
 
     Login() {

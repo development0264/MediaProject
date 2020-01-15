@@ -38,10 +38,10 @@
                 <ng-container matColumnDef="ImageVideoPath">
                     <mat-header-cell *matHeaderCellDef mat-sort-header>Image/Video</mat-header-cell>
                     <mat-cell *matCellDef="let row">
-
-                        <img width="90%" src="{{imageendpoint}}/{{row.filename}}" />
-                        <mat-video #video width="50%" src="{{imageendpoint}}/{{row.filename}}">
-                        </mat-video>
+                        <img width="90%" src="{{imageendpoint}}/{{row.filename}}" *ngIf="row.Type != 'Both' " />
+                        <video width="150" height="150" controls poster="{{imageendpoint}}/{{row.poster}}">
+                            <source src="{{imageendpoint}}/{{row.filename}}">
+                        </video>
                     </mat-cell>
 
 

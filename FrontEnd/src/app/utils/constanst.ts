@@ -6,6 +6,7 @@ export const CONSTANST = {
         authorization: {
             login: HOST + '/api/auth/login',
             signup: HOST + '/api/auth/signup',
+            resend: HOST + '/api/auth/resend',
             forgotpassword: HOST + '/api/auth/forgotpassword',
             request: HOST + '/api/auth/request',
             confirm: HOST + '/api/auth/confirm'

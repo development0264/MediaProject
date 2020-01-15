@@ -8,7 +8,10 @@ const BASE_URL = process.env.BASE_URL
 const api = apiAdapter(BASE_URL)
 
 var FormData = require('form-data');
-var multer = require('multer')();
+var multer = require('multer');
+var upload = multer().array('files', 2)
+var uploadvideo = multer().array('files', 5)
+var uploadphoto = multer().array('files', 5)
 
 router.get('/media/list', isAuthorized, (req, res) => {
     api.get(req.path, {
@@ -52,90 +55,139 @@ router.get('/media/sharedlist', isAuthorized, (req, res) => {
     })
 })
 
-router.post('/media/photo', multer.array('files', 5), isAuthorized, (req, res) => {
-    let form = new FormData();
-    for (var i = 0; i < req.files.length; i++) {
-        const fileRecievedFromClient = req.files[i];
-        form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
-    }
+router.post('/media/photo', isAuthorized, (req, res) => {
 
-    api.post(req.path, form, {
-        headers: {
-            'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
-            common: {
-                'Authorization': req.headers['authorization'],
-                'Tokenconfig': config.secret
-            }
-        },
-        'maxContentLength': Infinity,
-        'maxBodyLength': Infinity
-    }).then((responseFromServer2) => {
-        if (responseFromServer2.data.success) {
-            res.status(200).send(responseFromServer2.data)
+    uploadphoto(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
+        } else if (err) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
         } else {
-            res.status(401).send(responseFromServer2.data)
+
+            let form = new FormData();
+            for (var i = 0; i < req.files.length; i++) {
+                const fileRecievedFromClient = req.files[i];
+                form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+            }
+
+            api.post(req.path, form, {
+                headers: {
+                    'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
+                    common: {
+                        'Authorization': req.headers['authorization'],
+                        'Tokenconfig': config.secret
+                    }
+                },
+                'maxContentLength': Infinity,
+                'maxBodyLength': Infinity
+            }).then((responseFromServer2) => {
+                if (responseFromServer2.data.success) {
+                    res.status(200).send(responseFromServer2.data)
+                } else {
+                    res.status(401).send(responseFromServer2.data)
+                }
+            }).catch((err) => {
+                res.send(err)
+            })
+
         }
-    }).catch((err) => {
-        res.send(err)
     })
 })
 
-router.post('/media/video', multer.array('files', 5), isAuthorized, (req, res) => {
+router.post('/media/video', isAuthorized, (req, res) => {
 
-    let form = new FormData();
-    for (var i = 0; i < req.files.length; i++) {
-        const fileRecievedFromClient = req.files[i];
-        form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
-    }
-
-
-    api.post(req.path, form, {
-        headers: {
-            'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
-            common: {
-                'Authorization': req.headers['authorization'],
-                'Tokenconfig': config.secret
-            }
-        },
-        'maxContentLength': Infinity,
-        'maxBodyLength': Infinity
-    }).then((responseFromServer2) => {
-        if (responseFromServer2.data.success) {
-            res.status(200).send(responseFromServer2.data)
+    uploadvideo(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
+        } else if (err) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
         } else {
-            res.status(401).send(responseFromServer2.data)
+
+            let form = new FormData();
+            for (var i = 0; i < req.files.length; i++) {
+                const fileRecievedFromClient = req.files[i];
+                form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+            }
+
+            api.post(req.path, form, {
+                headers: {
+                    'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
+                    common: {
+                        'Authorization': req.headers['authorization'],
+                        'Tokenconfig': config.secret
+                    }
+                },
+                'maxContentLength': Infinity,
+                'maxBodyLength': Infinity
+            }).then((responseFromServer2) => {
+                if (responseFromServer2.data.success) {
+                    res.status(200).send(responseFromServer2.data)
+                } else {
+                    res.status(401).send(responseFromServer2.data)
+                }
+            }).catch((err) => {
+                res.send(err)
+            })
+
         }
-    }).catch((err) => {
-        res.send(err)
     })
 })
 
-router.post('/media/photoandvideo', multer.array('files', 5), isAuthorized, async (req, res) => {
+router.post('/media/photoandvideo', isAuthorized, async (req, res, next) => {
 
-    let form = new FormData();
-    for (var i = 0; i < req.files.length; i++) {
-        const fileRecievedFromClient = req.files[i];
-        form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
-    }
-
-    api.post(req.path, form, {
-        headers: {
-            'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
-            common: {
-                'Authorization': req.headers['authorization'],
-                'Tokenconfig': config.secret
-            }
-        },
-        'maxContentLength': Infinity,
-        'maxBodyLength': Infinity
-    }).then((responseFromServer2) => {
-        if (responseFromServer2.data.success) {
-            res.status(200).send(responseFromServer2.data)
+    upload(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
+        } else if (err) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
         } else {
-            res.status(401).send(responseFromServer2.data)
+            let form = new FormData();
+            for (var i = 0; i < req.files.length; i++) {
+                const fileRecievedFromClient = req.files[i];
+                form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+            }
+
+            api.post(req.path, form, {
+                params: {
+                    ispair: true
+                },
+                headers: {
+                    'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
+                    common: {
+                        'Authorization': req.headers['authorization'],
+                        'Tokenconfig': config.secret
+                    }
+                },
+                'maxContentLength': Infinity,
+                'maxBodyLength': Infinity
+            }).then((responseFromServer2) => {
+                if (responseFromServer2.data.success) {
+                    res.status(200).send(responseFromServer2.data)
+                } else {
+                    res.status(401).send(responseFromServer2.data)
+                }
+            }).catch((err) => {
+                res.status(401).send(err)
+            })
         }
-    }).catch((err) => {
-        res.send(err)
     })
 })
 

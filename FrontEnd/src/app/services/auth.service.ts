@@ -68,6 +68,24 @@ export class AuthService {
         }
     }
 
+    resend(user: User): Observable<any> {
+        console.log(user.emailresend)
+        if (user.emailresend !== '') {
+            return this.http.post(CONSTANST.routes.authorization.resend, {
+                email: user.emailresend,
+            }).pipe(
+                catchError((err: any) => {
+                    if (err instanceof HttpErrorResponse) {
+                        this.snack.open(err.error.message, 'Close',
+                            {
+                                duration: 3500, verticalPosition: 'top', panelClass: 'snack-error'
+                            });
+                    }
+                    return of(err.error.message);
+                }));
+        }
+    }
+
     forgotpassword(user: User): Observable<any> {
         if (user.email !== '') {
             var param = {

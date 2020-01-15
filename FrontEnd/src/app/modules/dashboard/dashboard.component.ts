@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewChild, ChangeDetectorRef, OnInit, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ChangeDetectorRef, OnInit, ElementRef, Renderer2 } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -17,10 +17,13 @@ import { environment } from './../../../environments/environment';
 // DIALOGS
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatVideoComponent } from 'mat-video';
 import { ConfirmComponent } from '../../components/confirm/confirm.component';
 import { FormsComponent } from './forms-dash/forms.component';
 import { FormsShareComponent } from './forms-share/forms-share.component';
 import { SnackbarComponent } from '../../components/snackbar/snackbar.component';
+
+
 
 @Component({
     selector: 'app-dashboard',
@@ -28,7 +31,7 @@ import { SnackbarComponent } from '../../components/snackbar/snackbar.component'
     styleUrls: ['./dashboard.component.css'],
     providers: [MediaService]
 })
-export class DashboardComponent implements AfterViewInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
     imageendpoint: string = environment.imageendpoint;
     displayedColumns = ['id', 'ImageVideoPath', 'filename', 'created', 'Type', 'Actions'];
     dataSource = new MatTableDataSource();
@@ -47,6 +50,7 @@ export class DashboardComponent implements AfterViewInit {
     @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: false }) sort: MatSort;
     @ViewChild('video', { static: false }) matVideo: ElementRef;
+    video: HTMLVideoElement;
 
     constructor(
         private cdr: ChangeDetectorRef,
@@ -58,7 +62,7 @@ export class DashboardComponent implements AfterViewInit {
     ) { }
 
     // IMPORTANTE: VERIFICAR SI EL TOKEN EXISTE.
-    ngOnInit() {
+    ngOnInit(): void {
         // VERIFICA QUE LA SESIÓN EXISTA EN AUTH.SERVICE.TS
         if (!this.authService.loggedIn.getValue()) {
             this.router.navigate(['/login']);

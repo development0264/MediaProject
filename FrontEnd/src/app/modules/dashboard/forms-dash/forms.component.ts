@@ -16,7 +16,7 @@ import { MatRadioChange } from '@angular/material';
 
 export class FormsComponent implements OnInit {
     frm: FormGroup;
-
+    mediatype: string;
     constructor(
         public dialogRef: MatDialogRef<FormsComponent>,
         @Inject(MAT_DIALOG_DATA)
@@ -29,6 +29,7 @@ export class FormsComponent implements OnInit {
 
 
     fileData: string[] = [];
+    fileDataVideo: string[] = [];
     previewUrl: any = null;
     fileUploadProgress: string = null;
     uploadedFilePath: string = null;
@@ -69,7 +70,7 @@ export class FormsComponent implements OnInit {
                 Type: new FormControl('Image', [Validators.required]),
                 id: new FormControl(null)
             });
-
+            this.mediatype = this.frm.controls.Type.value
             this.filetype = "image/*";
         }
     }
@@ -85,27 +86,26 @@ export class FormsComponent implements OnInit {
         //this.preview();
     }
 
-    // preview() {
-    //     // Show preview 
-    //     var mimeType = this.fileData.type;
-    //     if (mimeType.match(/image\/*/) == null) {
-    //         return;
-    //     }
-
-    //     var reader = new FileReader();
-    //     reader.readAsDataURL(this.fileData);
-    //     reader.onload = (_event) => {
-    //         this.previewUrl = reader.result;
-    //     }
-    // }
+    fileProgressVideo(e) {
+        if (parseInt(e.target.files.length) > 3) {
+            alert("You are only allowed to upload a maximum of 3 files");
+        } else {
+            for (var i = 0; i < e.target.files.length; i++) {
+                this.fileDataVideo.push(e.target.files[i]);
+            }
+        }
+        //this.preview();
+    }
 
     radioChange(event: MatRadioChange) {
+        this.mediatype = event.value
+        console.log(event.value)
         if (event.value == "Image") {
             this.filetype = "image/*";
         } else if (event.value == "Video") {
             this.filetype = "video/*";
         } else {
-            this.filetype = "video/*,image/*";
+            this.filetype = "image/*";
         }
     }
 
@@ -115,10 +115,13 @@ export class FormsComponent implements OnInit {
             let formData = new FormData();
             //formData.append(this.frm.controls.Type.value, this.fileData);
             //formData.append('iduser', localStorage.getItem('iduser'));
-
-            for (var i = 0; i < this.fileData.length; i++) {
+            for (var i = 0; i < this.fileDataVideo.length; i++) {
+                formData.append('files', this.fileDataVideo[i]);
+            }
+            for (var i = 0; i < this.fileDataVideo.length; i++) {
                 formData.append('files', this.fileData[i]);
             }
+
 
             this.fileUploadProgress = '0%';
 

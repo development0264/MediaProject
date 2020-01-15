@@ -42,6 +42,28 @@
                 <br>
                 <button mat-raised-button style="background-color: red;color: white;" (click)="Login()">Login
                 </button>
+                <br>
+
+            </form>
+
+            <form [formGroup]="formresend" (ngSubmit)="onResendSubmit()">
+                <div>
+                    <a style="color: red;left: 0px;font-size: 15px;" (click)="ForgotPassword()">If you not received any
+                        mail please
+                        press resend.</a>
+                </div>
+
+                <mat-form-field class="full-width-input">
+                    <input matInput placeholder="Email" formControlName="emailresend" required>
+                    <mat-error *ngIf="isResebdFieldInvalid('emailresend')">
+                        Please inform your email
+                    </mat-error>
+                    <mat-error *ngIf="isResebdFieldInvalid('emailresend')">
+                        Email must be a valid email address
+                    </mat-error>
+                </mat-form-field>
+
+                <button mat-raised-button color="primary" type="submit" [disabled]="!formresend.valid">Resend</button>
             </form>
         </mat-card-content>
     </mat-card>

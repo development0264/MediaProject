@@ -44,6 +44,12 @@
                                         accept="{{filetype}}" />
                                 </div>
 
+                                <h3 *ngIf="mediatype == 'Both'">Choose Video File</h3>
+                                <div class="form-group" *ngIf="mediatype == 'Both'">
+                                    <input type="file" name="image" (change)="fileProgressVideo($event)"
+                                        accept="video/*" />
+                                </div>
+
                                 <div class="full-wrapper button-wrapper" *ngIf="previewUrl">
                                     <div class="button-wrapper">
                                         <a mat-flat-button color="primary" (click)="removeImage()">Remove</a>
