@@ -10,8 +10,34 @@ const api = apiAdapter(BASE_URL)
 var FormData = require('form-data');
 var multer = require('multer');
 var upload = multer().array('files', 2)
+<<<<<<< HEAD
 var uploadvideo = multer().array('files', 5)
 var uploadphoto = multer().array('files', 5)
+=======
+var uploadphoto = multer({
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+            cb(null, true);
+        } else {
+            cb(null, false);
+            return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        }
+    }
+}).array('files', 5)
+
+var limits = { fileSize: 52428800 * 5 };
+var uploadvideo = multer({
+    limits: limits,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype == "video/mp4") {
+            cb(null, true);
+        } else {
+            cb(null, false);
+            return cb(new Error('Only .mp4 format allowed!'));
+        }
+    }
+}).array('files', 4)
+>>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
 
 router.get('/media/list', isAuthorized, (req, res) => {
     api.get(req.path, {
@@ -69,6 +95,7 @@ router.post('/media/photo', isAuthorized, (req, res) => {
                 "message": err.message
             });
         } else {
+<<<<<<< HEAD
 
             let form = new FormData();
             for (var i = 0; i < req.files.length; i++) {
@@ -96,11 +123,45 @@ router.post('/media/photo', isAuthorized, (req, res) => {
                 res.send(err)
             })
 
+=======
+            if (req.files != undefined) {
+                let form = new FormData();
+                for (var i = 0; i < req.files.length; i++) {
+                    const fileRecievedFromClient = req.files[i];
+                    form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+                }
+
+                api.post(req.path, form, {
+                    headers: {
+                        'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
+                        common: {
+                            'Authorization': req.headers['authorization'],
+                            'Tokenconfig': config.secret
+                        }
+                    },
+                    'maxContentLength': Infinity,
+                    'maxBodyLength': Infinity
+                }).then((responseFromServer2) => {
+                    if (responseFromServer2.data.success) {
+                        res.status(200).send(responseFromServer2.data)
+                    } else {
+                        res.status(401).send(responseFromServer2.data)
+                    }
+                }).catch((err) => {
+                    res.send(err)
+                })
+            }
+            else {
+                res.status(401).send({ success: false, message: "Please Select atleast One File..." })
+
+            }
+>>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
         }
     })
 })
 
 router.post('/media/video', isAuthorized, (req, res) => {
+<<<<<<< HEAD
 
     uploadvideo(req, res, function (err) {
         if (err instanceof multer.MulterError) {
@@ -141,6 +202,54 @@ router.post('/media/video', isAuthorized, (req, res) => {
                 res.send(err)
             })
 
+=======
+    req.setTimeout(36000000);
+    uploadvideo(req, res, function (err) {
+
+        if (err instanceof multer.MulterError) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
+        } else if (err) {
+            res.status(500).send({
+                "status": "failed",
+                "message": err.message
+            });
+        } else {
+            if (req.files != undefined) {
+                let form = new FormData();
+                for (var i = 0; i < req.files.length; i++) {
+                    const fileRecievedFromClient = req.files[i];
+                    form.append(fileRecievedFromClient.fieldname, fileRecievedFromClient.buffer, fileRecievedFromClient.originalname, fileRecievedFromClient.mimetype);
+                }
+
+                api.post(req.path, form, {
+                    headers: {
+                        'Content-Type': `multipart/form-data; boundary=${form._boundary}`,
+                        common: {
+                            'Authorization': req.headers['authorization'],
+                            'Tokenconfig': config.secret
+                        }
+                    },
+                    'maxContentLength': Infinity,
+                    'maxBodyLength': Infinity
+                }).then((responseFromServer2) => {
+                    console.log("Save", responseFromServer2)
+                    if (responseFromServer2.data.success) {
+                        res.status(200).send(responseFromServer2.data)
+                    } else {
+                        res.status(401).send(responseFromServer2.data)
+                    }
+                }).catch((err) => {
+                    res.send(err)
+                })
+            }
+            else {
+                res.status(401).send({ success: false, message: "Please Select atleast One File..." })
+
+            }
+>>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
         }
     })
 })

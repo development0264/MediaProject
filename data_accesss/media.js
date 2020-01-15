@@ -112,6 +112,7 @@ function userImage() {
     }
 
     this.SaveMedia = async function (decode, Filename) {
+        console.log(Filename.Type)
         return sequelize.transaction(function (t) {
             return Media.create({
                 iduser: decode.id,

@@ -37,13 +37,13 @@ async function loginRoute(req, res) {
 
     let retrySecs = 0;
 
-    console.log(resFastByIP)
+    console.log('resFastByIP', resFastByIP)
     if (resFastByIP !== null && resFastByIP.consumedPoints > maxWrongAttemptsByIPperMinute) {
         retrySecs = Math.round(resFastByIP.msBeforeNext / 1000) || 1;
     }
 
-    console.log(retrySecs)
-    if (retrySecs > 0) {
+    console.log('retrySecs', retrySecs)
+    if (retrySecs > 1) {
         res.set('Retry-After', String(retrySecs));
         res.status(200).send({ success: false, message: "multiple attempts to login Retry-After : " + parseInt(retrySecs / 60) + " minutes" });
     } else {
@@ -421,7 +421,7 @@ function userTransaction() {
             if (response) {
                 return { success: true };
             } else {
-                return { success: false, message: "Invalid token : " + req.body.token };
+                return { success: false, message: "Invalid token" };
             }
         }).catch(function (err) {
             res.json({

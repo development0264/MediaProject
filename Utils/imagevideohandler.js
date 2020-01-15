@@ -12,6 +12,7 @@ function imagevideohandler() {
         return new Promise(function (resolve, reject) {
             var form = new formidable.IncomingForm();
             var FileName = [];
+            var ImageCount = 0;
             form.parse(req, function (err, fields, files) {
             });
             form.on('fileBegin', function (name, file) {
@@ -19,9 +20,14 @@ function imagevideohandler() {
                 if (!fs.existsSync(dir)) {
                     fs.mkdirSync(dir);
                 }
+                ImageCount++
                 form.uploadDir = __dirname + "/../" + process.env.MediaFolderName;
                 var ext = file.name.split('.')[file.name.split('.').length - 1];
+<<<<<<< HEAD
                 var NewName = Commonfunction.GetMediaNameFromDate();
+=======
+                var NewName = Commonfunction.GetMediaNameFromDate() + "" + ImageCount;
+>>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
                 if (ext.indexOf('?') > -1) {
                     ext = ext.substring(0, ext.indexOf('?'));
                 };
