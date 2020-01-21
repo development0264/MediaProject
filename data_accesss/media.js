@@ -112,7 +112,6 @@ function userImage() {
     }
 
     this.SaveMedia = async function (decode, Filename) {
-        console.log(Filename.Type)
         return sequelize.transaction(function (t) {
             return Media.create({
                 iduser: decode.id,
@@ -194,18 +193,25 @@ function userImage() {
                     allowNull: false
                 }
             });
-
+            Usershare.belongsTo(Media, {
+                foreignKey: {
+                    name: 'idmedia',
+                    allowNull: false
+                }
+            });
             return Usershare.findAndCountAll({
                 where: { idtouser: req.query.iduser },
                 include: [{
                     model: User,
                     required: true,
+                }, {
+                    model: Media,
+                    required: false,
                 }]
             }).then(function (response) {
                 var unreadmessage = 0
                 if (response.rows.length > 0) {
                     unreadmessage = u.filter(response.rows, { isread: 0 });
-
                 }
                 return { success: true, data: response.rows, unreadcount: unreadmessage.length }
             })
@@ -215,6 +221,7 @@ function userImage() {
             return ({
                 success: false,
                 message: err.message,
+                unreadcount: 0
             });
         });
     }

@@ -3,6 +3,7 @@ var router = express.Router();
 var models = require('../models');
 var sequelize = models.sequelize;
 var Contactus = models.tblcontactus;
+const isrefreshAuthorized = require('../Utils/tokenhandler').isrefreshAuthorized;
 var fs = require('fs');
 
 
@@ -41,5 +42,7 @@ router.post('/contactus', async (req, res) => {
         });
     });
 })
+
+router.post('/accesstoken', isrefreshAuthorized, async (req, res) => { })
 
 module.exports = router

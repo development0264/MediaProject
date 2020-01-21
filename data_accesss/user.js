@@ -86,12 +86,15 @@ async function loginRoute(req, res) {
                         var token = tokenhandler.sign(user, config.AuthorizationexpiresIn)
 
                         CheckInviteUser(req.body.email, response.id).then(function () {
-
-                            res.status(200).send({
-                                success: true,
-                                token: token,
-                                data: response,
-                                message: "Login Successfully..."
+                            var refreshToken = tokenhandler.sign(user, config.refreshTokenexpiresIn)
+                            response.updateAttributes({ refreshToken: refreshToken }).then(function () {
+                                res.status(200).send({
+                                    success: true,
+                                    token: token,
+                                    refreshToken: refreshToken,
+                                    data: response,
+                                    message: "Login Successfully..."
+                                })
                             })
                         })
 
@@ -481,6 +484,32 @@ function userTransaction() {
         });
     }
 
+    this.checkrefreshToken = async function (req, res) {
+        console.log("checkrefreshToken", req.query.token)
+        return new Promise(function (resolve, reject) {
+            return User.findOne({ where: { refreshToken: req.query.token, isaccountverify: true } }).then(function (UserExist) {
+                if (UserExist != null) {
+                    resolve(true)
+                }
+                else {
+                    resolve(false)
+                }
+            })
+        }).then(function (response) {
+            if (response) {
+                return { success: true };
+            } else {
+                return { success: false, message: "Invalid token" };
+            }
+        }).catch(function (err) {
+            return {
+                success: false,
+                message: err.message,
+            };
+        });
+    }
+
+
     this.share = async function (req, res) {
         return new Promise(function (resolve, reject) {
             return User.findOne({ where: { email: req.body.email } }).then(function (UserExist) {
@@ -497,6 +526,7 @@ function userTransaction() {
                         objShare.createdby = req.query.email;
                         objShare.title = req.body.title;
                         objShare.description = req.body.description;
+
                         Share.findOrCreate({
                             where:
                             {
@@ -551,6 +581,8 @@ function userTransaction() {
                                 objShare.createdate = new Date();
                                 objShare.createdby = req.query.email;
                                 objShare.idinvited = InviteResponse[0].id
+                                objShare.title = req.body.title;
+                                objShare.description = req.body.description;
 
                                 Share.findOrCreate({
                                     where:

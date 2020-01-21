@@ -25,10 +25,7 @@ describe('Auth API Tests', function () {
     console.log("signup", signup)
 
     var token;
-<<<<<<< HEAD
-=======
     var RequestToken;
->>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
 
     describe('## signup ', () => {
         it('should return 409 if name is not provided', function (done) {
@@ -151,54 +148,49 @@ describe('Auth API Tests', function () {
                 });
         });
 
-<<<<<<< HEAD
-=======
 
-
-        it('should return 200 after adding new user and 409 after re adding same user', function (done) {
->>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
-
-
-        it('should return 200 after adding new user and 409 after re adding same user', function (done) {
-
-            console.log("fghdfgkjhdfkjgbdfkjbghkjdfgkjdfbgkj", signup)
+        it('should return null if user not exist ', function (done) {
             request(app)
                 .post('/api/auth/checkuserexist')
                 .send(signup)
                 .end(function (err, res) {
+                    console.log(res.body.data)
                     expect(res.body.data).to.equal(null);
+                    console.log("calll1")
+                    done();
                 });
+        })
 
 
+        it('should return 200 If adding new user', function (done) {
+            this.timeout(15000);
+            console.log("calll2")
             request(app)
                 .post('/api/auth/signup')
                 .send(signup)
                 .end(function (err, res) {
-                    console.log(res.statusCode)
+                    console.log("calll3")
                     expect(res.statusCode).to.equal(200);
                     expect(res.body).to.have.property('token');
                     token = res.body.token;
-
-                    request(app)
-                        .post('/api/auth/signup')
-                        .send(signup)
-                        .end(function (err, res) {
-                            expect(res.statusCode).to.equal(409);
-                            done();
-                        });
+                    console.log("token", token)
+                    done();
+                    setTimeout(done, 15000);
                 });
 
         })
+
     });
 
     describe('## verify ', function () {
 
         var InvalidToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZbmFtZSI6IkpheV90YW1ha3V3YWxhMiIsImVtYWlsIjoiSmF5c3RhbWFrdXdhbGEzQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiJDJhJDA4JFU1ajlDQkdsRGlrdS5HbnIyR0JDVC5xS3BSQkdMeloxUlpKMGJqTzFLV3MzS3NYMjBBbGxpIiwiaWF0IjoxNTc3OTc0MjA5LCJleHAiOjE1Nzg4MzgyMDl9.hR97qDmaGxrrR9sFapEZ0SycA6d5blkRNxm2wyL_CTE"
-
         it('should return 409 if Invalid token', function (done) {
+            console.log("calll4")
             request(app)
                 .get('/api/auth/verify?token=' + InvalidToken)
                 .end(function (err, res) {
+                    console.log(res.statusCode)
                     expect(res.statusCode).to.equal(409);
                     done();
                 });
@@ -296,16 +288,13 @@ describe('Auth API Tests', function () {
                 .post('/api/auth/login')
                 .send(loginInvalid)
                 .end(function (err, res) {
-                    expect(res.statusCode).to.equal(422);
+                    console.log("email or password is invalid", res.statusCode)
+                    expect(res.statusCode).to.equal(400);
                     done();
                 });
         });
 
-<<<<<<< HEAD
-        var Authorizationtoken = null;
-=======
         global.Authorizationtoken = null;
->>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
         var login = {
             "email": process.env.unit_test_email,
             "password": process.env.unit_test_password,
@@ -368,13 +357,20 @@ describe('Auth API Tests', function () {
         });
 
 
+
         it('should return 200 if forgotpassword success', function (done) {
+            this.timeout(15000);
+            console.log("calll2")
             request(app)
                 .get("/api/auth/forgotpassword?email=" + process.env.unit_test_email + "")
                 .end(function (err, res) {
+                    console.log("calll3")
+                    console.log(res.statusCode)
+                    expect(res.statusCode).to.equal(200);
                     expect(res.body).to.have.property('token');
                     RequestToken = res.body.token;
                     done();
+                    setTimeout(done, 15000);
                 });
         });
     })

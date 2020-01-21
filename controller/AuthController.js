@@ -8,6 +8,7 @@ router.use(bodyParser.json());
 
 router.post('/signup', async (req, res) => {
     var response = await User.signup(req, res);
+    console.log("response", response)
     res.status(200).send(response).end();
 })
 
@@ -58,6 +59,11 @@ router.post('/confirm', async (req, res) => {
 
 router.get('/check', async (req, res) => {
     var response = await User.checkuser(req, res);
+    res.status(200).send(response).end();
+});
+
+router.get('/checkrefreshToken', async (req, res) => {
+    var response = await User.checkrefreshToken(req, res);
     res.status(200).send(response).end();
 });
 

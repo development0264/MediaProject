@@ -3,7 +3,7 @@
 module.exports = function (sequelize, DataTypes) {
   return sequelize.define('tbluser', {
     id: {
-      type: DataTypes.INTEGER(11),
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true
@@ -32,6 +32,10 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.INTEGER(1),
       allowNull: true,
       defaultValue: '0'
+    },
+    refreshToken: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     tableName: 'tbluser'

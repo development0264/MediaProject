@@ -42,10 +42,4 @@ http.listen(process.env.GatewayPort, function () {
     console.log('listening on *:' + process.env.GatewayPort);
 });
 
-io.sockets.on('connection', function (socket) {
-    console.log('connection...');
-})
-
 module.exports = app;
-
-// app.listen(3000);

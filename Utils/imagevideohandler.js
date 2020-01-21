@@ -23,11 +23,7 @@ function imagevideohandler() {
                 ImageCount++
                 form.uploadDir = __dirname + "/../" + process.env.MediaFolderName;
                 var ext = file.name.split('.')[file.name.split('.').length - 1];
-<<<<<<< HEAD
-                var NewName = Commonfunction.GetMediaNameFromDate();
-=======
                 var NewName = Commonfunction.GetMediaNameFromDate() + "" + ImageCount;
->>>>>>> 5114a838d2b297fd096a3c68a9a79da5078f84d6
                 if (ext.indexOf('?') > -1) {
                     ext = ext.substring(0, ext.indexOf('?'));
                 };

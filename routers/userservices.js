@@ -47,6 +47,7 @@ router.post('/auth/signup', async (req, res) => {
                 res.status(responseFromServer2.data.statuscode).send(responseFromServer2.data)
             }
         }).catch((err) => {
+            console.log('err', err)
             res.status(417).send(err)
         })
     }
