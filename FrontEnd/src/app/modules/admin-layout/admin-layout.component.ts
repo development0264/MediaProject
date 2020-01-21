@@ -34,7 +34,7 @@ export class AdminLayoutComponent implements OnInit {
     isLoggedIn$: Observable<boolean>;
     mobileQuery: MediaQueryList;
     private _mobileQueryListener: () => void;
-    private url = 'http://192.168.0.140:3000';
+    private url = 'http://localhost:3000';
     terms = CONSTANST.routes.generic.terms;
     private socket;
     notificationcount = 0
